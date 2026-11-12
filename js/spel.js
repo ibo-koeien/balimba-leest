@@ -412,15 +412,22 @@
 
   // ---------- Opstarten ----------
 
+  // De databestanden krijgen het versienummer van de pagina mee, zodat ze bij elke
+  // nieuwe versie opnieuw worden opgehaald in plaats van uit de cache van de browser.
+  function haalJson(pad) {
+    return fetch(pad + "?v=" + (window.BALIMBA_VERSIE || ""), { cache: "no-cache" })
+      .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+
   async function laad() {
     try {
       const [w, i] = await Promise.all([
-        fetch("data/woorden.json").then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
-        fetch("data/instellingen.json").then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        haalJson("data/woorden.json"),
+        haalJson("data/instellingen.json")
       ]);
       woorden = w; inst = i;
       // Ontbreekt de lijst met opnames, dan speelt het spel zonder stem.
-      opnames = await fetch("data/opnames.json").then((r) => (r.ok ? r.json() : opnames)).catch(() => opnames);
+      opnames = await haalJson("data/opnames.json").catch(() => opnames);
       if (!woorden.levels[plek.level] || plek.ronde >= aantalRondes(plek.level)) plek = { level: 0, ronde: 0 };
       vulStart();
     } catch (e) {
