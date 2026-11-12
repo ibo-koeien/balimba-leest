@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Balimba leest – luistertest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf6ff;
+    --ink: #2b1b4a;
+    --soft: #6f5f8f;
+    --card: #ffffff;
+    --accent: #8a4fff;
+    --good: #1f9d6b;
+    --retry: #d9822b;
+    --line: #e6dcf5;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Andika", "Chalkboard SE", "Comic Sans MS", system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+  }
+  header { width: 100%; max-width: 720px; display: flex; justify-content: space-between; align-items: baseline; color: var(--soft); font-size: 18px; }
+  main { width: 100%; max-width: 720px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
+  .word {
+    font-size: clamp(88px, 22vw, 180px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 32px;
+    padding: 24px 48px;
+    min-width: 60%;
+    text-align: center;
+  }
+  .word.good { border-color: var(--good); }
+  .mic {
+    width: 132px; height: 132px; border-radius: 50%;
+    border: none; background: var(--accent); color: #fff;
+    font-size: 60px; cursor: pointer;
+    display: grid; place-items: center;
+    box-shadow: 0 8px 0 #5d2fc4;
+    transition: transform .08s, box-shadow .08s;
+  }
+  .mic:active { transform: translateY(6px); box-shadow: 0 2px 0 #5d2fc4; }
+  .mic.listening { animation: pulse 1.1s ease-in-out infinite; background: #e0457b; box-shadow: 0 8px 0 #a82a57; }
+  .mic:disabled { opacity: .4; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+  @media (prefers-reduced-motion: reduce) { .mic.listening { animation: none; } }
+  .status { min-height: 64px; text-align: center; font-size: 22px; color: var(--soft); }
+  .status b { color: var(--ink); }
+  .status .ok { color: var(--good); font-weight: 700; }
+  .status .no { color: var(--retry); font-weight: 700; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    font: inherit; font-size: 20px; padding: 14px 22px; border-radius: 16px;
+    border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer;
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .hidden { display: none !important; }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 16px; overflow: hidden; font-size: 20px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  th { color: var(--soft); font-weight: 400; font-size: 16px; }
+  .score { font-size: 56px; font-weight: 700; }
+  .note { color: var(--soft); font-size: 18px; text-align: center; max-width: 560px; }
+  .error { background: #fff3e6; border: 2px solid var(--retry); border-radius: 16px; padding: 16px 20px; font-size: 19px; max-width: 560px; }
+</style>
+</head>
+<body>
+<header>
+  <span>Balimba leest · luistertest</span>
+  <span id="counter"></span>
+</header>
+
+<main id="start">
+  <div class="note" style="font-size:22px;color:var(--ink)">
+    Tien woorden. Tik op de microfoon, lees het woord hardop, en kijk wat de iPad verstaat.
+  </div>
+  <button class="btn primary" id="startBtn" style="font-size:26px;padding:18px 34px">Begin</button>
+  <div class="note">Open deze pagina in Safari. De eerste keer vraagt de iPad toestemming voor de microfoon en de spraakherkenning.</div>
+  <div class="error hidden" id="unsupported">
+    Deze browser heeft geen spraakherkenning. Open de pagina in Safari op de iPad.
+  </div>
+</main>
+
+<main id="play" class="hidden">
+  <div class="word" id="word"></div>
+  <button class="mic" id="mic" aria-label="Luister">🎤</button>
+  <div class="status" id="status"></div>
+  <div class="row">
+    <button class="btn" id="parentGood">Ze las het goed</button>
+    <button class="btn" id="parentBad">Ze las het fout</button>
+    <button class="btn primary hidden" id="next">Volgende</button>
+  </div>
+  <div class="error hidden" id="err"></div>
+</main>
+
+<main id="done" class="hidden">
+  <div class="score" id="score"></div>
+  <div class="note" id="verdict"></div>
+  <table id="results"></table>
+  <div class="row">
+    <button class="btn primary" id="again">Nog een keer</button>
+  </div>
+</main>
+
+<script>
+// Stap 1: luistertest. Tien woorden uit level 1.
+const WORDS = ["wolk", "klop", "kruis", "werp", "rots", "plat", "smal", "vuist", "plaat", "knop"];
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const $ = (id) => document.getElementById(id);
+
+let index = 0;
+let results = [];      // per woord: { word, heard: [..], recognised, parent }
+let rec = null;
+let listening = false;
+
+function normalise(s) {
+  return s.toLowerCase().normalize("NFC").replace(/[^a-zà-ÿ\s]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+// Klanken die je niet hoort verschillen: eind-d/t, eind-b/p, ei/ij, au/ou, c/k, z/s aan het begin.
+function soundKey(w) {
+  return w
+    .replace(/ij/g, "ei").replace(/ou/g, "au").replace(/c(?![eiy])/g, "k")
+    .replace(/dt$/, "t").replace(/d$/, "t").replace(/b$/, "p");
+}
+
+function distance(a, b) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++)
+    for (let j = 1; j <= b.length; j++)
+      d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+  return d[a.length][b.length];
+}
+
+// "exact": het woord (of een klankgelijke vorm) zit in wat verstaan is.
+// "close": één letter verschil. Dat tellen we apart, zodat we zien hoe mild we moeten zijn.
+function match(target, transcript) {
+  const t = soundKey(target);
+  const tokens = normalise(transcript).split(" ").filter(Boolean).map(soundKey);
+  const joined = tokens.join("");
+  if (tokens.includes(t) || joined === t) return "exact";
+  if (tokens.some((tok) => distance(tok, t) <= 1) || distance(joined, t) <= 1) return "close";
+  return "none";
+}
+
+function show(id) {
+  for (const m of ["start", "play", "done"]) $(m).classList.toggle("hidden", m !== id);
+}
+
+function loadWord() {
+  const w = WORDS[index];
+  results[index] = { word: w, heard: [], recognised: "none", parent: null };
+  $("word").textContent = w;
+  $("word").classList.remove("good");
+  $("status").innerHTML = "Tik op de microfoon en lees het woord.";
+  $("counter").textContent = (index + 1) + " van " + WORDS.length;
+  $("next").classList.add("hidden");
+  $("err").classList.add("hidden");
+  $("mic").disabled = false;
+}
+
+function setListening(on) {
+  listening = on;
+  $("mic").classList.toggle("listening", on);
+  $("mic").textContent = on ? "👂" : "🎤";
+}
+
+function explainError(code) {
+  const map = {
+    "not-allowed": "De microfoon is niet toegestaan. Ga naar Instellingen › Safari › Microfoon en kies Vraag of Sta toe, en herlaad de pagina.",
+    "service-not-allowed": "De spraakherkenning staat uit. Zet Dicteren aan in Instellingen › Algemeen › Toetsenbord, en herlaad de pagina.",
+    "network": "Geen verbinding met de spraakherkenning. Controleer de wifi en probeer opnieuw.",
+    "audio-capture": "De iPad vindt geen microfoon. Sluit andere apps die de microfoon gebruiken.",
+    "language-not-supported": "Nederlands wordt niet ondersteund op dit apparaat. Laat me dit weten, dan kiezen we een andere aanpak."
+  };
+  return map[code] || null;
+}
+
+function listen() {
+  if (listening) { rec && rec.stop(); return; }
+  const r = results[index];
+  rec = new SR();
+  rec.lang = "nl-NL";
+  rec.continuous = false;
+  rec.interimResults = true;
+  rec.maxAlternatives = 5;
+
+  let best = "none";
+  let lastHeard = "";
+
+  rec.onstart = () => { setListening(true); $("status").innerHTML = "Ik luister…"; };
+
+  rec.onresult = (e) => {
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      for (let a = 0; a < e.results[i].length; a++) {
+        const text = e.results[i][a].transcript.trim();
+        if (!text) continue;
+        lastHeard = text;
+        if (!r.heard.includes(text)) r.heard.push(text);
+        const m = match(r.word, text);
+        if (m === "exact" || (m === "close" && best === "none")) best = m;
+      }
+    }
+    $("status").innerHTML = "Ik hoor: <b>" + escapeHtml(lastHeard) + "</b>";
+    if (best === "exact") rec.stop();
+  };
+
+  rec.onerror = (e) => {
+    const msg = explainError(e.error);
+    if (msg) { $("err").textContent = msg; $("err").classList.remove("hidden"); }
+    r.error = e.error;
+  };
+
+  rec.onend = () => {
+    setListening(false);
+    if (best !== "none" && (r.recognised === "none" || best === "exact")) r.recognised = best;
+    if (best === "exact") {
+      $("word").classList.add("good");
+      $("status").innerHTML = "<span class='ok'>Verstaan!</span> Ik hoorde: <b>" + escapeHtml(lastHeard) + "</b>";
+    } else if (best === "close") {
+      $("status").innerHTML = "<span class='no'>Bijna.</span> Ik hoorde: <b>" + escapeHtml(lastHeard) + "</b>";
+    } else if (lastHeard) {
+      $("status").innerHTML = "<span class='no'>Niet verstaan.</span> Ik hoorde: <b>" + escapeHtml(lastHeard) + "</b>";
+    } else {
+      $("status").innerHTML = "<span class='no'>Ik hoorde niets.</span> Tik nog eens op de microfoon.";
+    }
+    $("next").classList.remove("hidden");
+  };
+
+  try { rec.start(); } catch (err) { setListening(false); }
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function setParent(value) {
+  results[index].parent = value;
+  $("parentGood").classList.toggle("primary", value === true);
+  $("parentBad").classList.toggle("primary", value === false);
+  $("next").classList.remove("hidden");
+}
+
+function next() {
+  if (listening && rec) rec.abort();
+  $("parentGood").classList.remove("primary");
+  $("parentBad").classList.remove("primary");
+  index++;
+  if (index >= WORDS.length) return finish();
+  loadWord();
+}
+
+function finish() {
+  const exact = results.filter((r) => r.recognised === "exact").length;
+  const close = results.filter((r) => r.recognised === "close").length;
+  $("counter").textContent = "";
+  $("score").textContent = exact + " van " + WORDS.length + " verstaan";
+  let verdict = close ? "Daarnaast " + close + " keer bijna goed (één letter verschil). " : "";
+  if (exact + close >= 7) verdict += "Dat is genoeg om op door te bouwen.";
+  else verdict += "Dat is te weinig om op te vertrouwen. Stuur me deze uitslag, dan kiezen we een andere aanpak.";
+  $("verdict").textContent = verdict;
+
+  const label = { exact: "verstaan", close: "bijna", none: "niet verstaan" };
+  const parent = (p) => (p === true ? "goed" : p === false ? "fout" : "–");
+  $("results").innerHTML =
+    "<tr><th>Woord</th><th>iPad hoorde</th><th>iPad</th><th>Ouder</th></tr>" +
+    results.map((r) =>
+      "<tr><td><b>" + r.word + "</b></td><td>" + (r.heard.map(escapeHtml).join(" · ") || "–") +
+      "</td><td>" + label[r.recognised] + "</td><td>" + parent(r.parent) + "</td></tr>").join("");
+  show("done");
+}
+
+function begin() {
+  index = 0; results = [];
+  show("play");
+  loadWord();
+}
+
+if (!SR) {
+  $("unsupported").classList.remove("hidden");
+  $("startBtn").disabled = true;
+}
+$("startBtn").addEventListener("click", begin);
+$("again").addEventListener("click", begin);
+$("mic").addEventListener("click", listen);
+$("next").addEventListener("click", next);
+$("parentGood").addEventListener("click", () => setParent(true));
+$("parentBad").addEventListener("click", () => setParent(false));
+</script>
+</body>
+</html>
