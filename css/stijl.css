@@ -31,7 +31,7 @@ body {
   overflow: hidden;
 }
 
-button { font: inherit; color: inherit; cursor: pointer; border: none; touch-action: manipulation; }
+button { font: inherit; color: inherit; cursor: pointer; border: none; padding: 0; margin: 0; touch-action: manipulation; -webkit-appearance: none; appearance: none; }
 
 .verborgen { display: none !important; }
 
@@ -173,6 +173,9 @@ h1 { margin: 0; font-size: clamp(36px, 7vw, 60px); }
   transition: transform .08s, box-shadow .08s, opacity .2s;
 }
 /* Vaste maat: Safari tekent een svg met een maat in procenten hier niet. */
+/* Het icoon staat exact in het midden, los van hoe de browser een knop opmaakt. */
+.rond { position: relative; }
+.rond > * { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); line-height: 1; }
 .rond svg { display: block; width: clamp(58px, 11vw, 78px); height: clamp(58px, 11vw, 78px); }
 .rond:active { transform: translateY(7px); }
 .rond.goed { background: var(--groen); box-shadow: 0 9px 0 var(--groen-diep); }
