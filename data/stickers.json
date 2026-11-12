@@ -1,0 +1,102 @@
+{
+  "perLevel": 5,
+  "keuzePerVel": 6,
+  "stickers": [
+    {
+      "id": "eenhoorn",
+      "naam": "Eenhoorn"
+    },
+    {
+      "id": "katje",
+      "naam": "Katje"
+    },
+    {
+      "id": "regenboog",
+      "naam": "Regenboog"
+    },
+    {
+      "id": "hartje",
+      "naam": "Hartje"
+    },
+    {
+      "id": "ster",
+      "naam": "Ster"
+    },
+    {
+      "id": "puppy",
+      "naam": "Puppy"
+    },
+    {
+      "id": "vlinder",
+      "naam": "Vlinder"
+    },
+    {
+      "id": "ijsje",
+      "naam": "IJsje"
+    },
+    {
+      "id": "bloem",
+      "naam": "Bloem"
+    },
+    {
+      "id": "cupcake",
+      "naam": "Cupcake"
+    },
+    {
+      "id": "konijn",
+      "naam": "Konijn"
+    },
+    {
+      "id": "kroon",
+      "naam": "Kroon"
+    },
+    {
+      "id": "diamant",
+      "naam": "Diamant"
+    },
+    {
+      "id": "wolkje",
+      "naam": "Wolkje"
+    },
+    {
+      "id": "aardbei",
+      "naam": "Aardbei"
+    },
+    {
+      "id": "panda",
+      "naam": "Panda"
+    },
+    {
+      "id": "lieveheersbeestje",
+      "naam": "Lieveheersbeestje"
+    },
+    {
+      "id": "maan",
+      "naam": "Maan"
+    },
+    {
+      "id": "toverstaf",
+      "naam": "Toverstaf"
+    },
+    {
+      "id": "donut",
+      "naam": "Donut"
+    },
+    {
+      "id": "kuiken",
+      "naam": "Kuiken"
+    },
+    {
+      "id": "paddenstoel",
+      "naam": "Paddenstoel"
+    },
+    {
+      "id": "ballon",
+      "naam": "Ballon"
+    },
+    {
+      "id": "cadeau",
+      "naam": "Cadeautje"
+    }
+  ]
+}

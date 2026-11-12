@@ -47,7 +47,7 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; padding: 
 }
 
 /* Beginscherm */
-#start, #klaar { justify-content: center; gap: 16px; text-align: center; }
+#start, #klaar, #kiezen { justify-content: center; gap: 16px; text-align: center; }
 #start .eenhoorn.groot { font-size: clamp(80px, 14vw, 130px); }
 h1 { margin: 0; font-size: clamp(36px, 7vw, 60px); }
 .waar { margin: 0; font-size: 20px; color: var(--zacht); }
@@ -227,3 +227,56 @@ body[data-vorm="alleen"] .goed .duim { display: inline; }
   .woord.kort { font-size: clamp(72px, 17vw, 150px); }
   .woord.lang { font-size: clamp(54px, 12vw, 120px); }
 }
+
+/* ---------- Stickers ---------- */
+.sticker {
+  -webkit-user-drag: none; -webkit-touch-callout: none; user-select: none;
+  filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 3px 3px rgba(60, 30, 110, .25));
+}
+.vakjes { display: flex; gap: 10px; align-items: center; }
+.vakje {
+  width: 50px; height: 50px; border-radius: 50%; flex: none;
+  border: 3px dashed #c3b0ea; background: rgba(255, 255, 255, .75);
+  display: grid; place-items: center;
+  transition: transform .15s, background .15s;
+}
+.vakje img { width: 92%; height: 92%; display: block; }
+.vakje.vol { border: 3px solid var(--rand); background: #fff; }
+.vakjes.groot { gap: clamp(10px, 2vw, 20px); }
+.vakjes.groot .vakje { width: clamp(72px, 11.5vw, 108px); height: clamp(72px, 11.5vw, 108px); }
+.vakje.doel { border-color: var(--paars); background: #fff; animation: wenk 1.2s ease-in-out infinite; }
+.vakje.boven { background: #efe6ff; animation: none; transform: scale(1.14); }
+.vakje.net { animation: hup .6s ease; }
+
+.strook { background: rgba(255, 255, 255, .8); border-radius: 999px; padding: 8px 16px; box-shadow: 0 5px 0 var(--rand); }
+.strook.wenk { animation: wenk 1.2s ease-in-out infinite; }
+.rond.plak { background: #ff7fbf; box-shadow: 0 9px 0 #d4569a; }
+
+#kiezen { gap: clamp(18px, 3vw, 32px); }
+.vel {
+  background: #fff; border: 4px solid var(--rand); border-radius: 32px; box-shadow: 0 10px 0 var(--rand);
+  padding: clamp(16px, 3vw, 28px) clamp(20px, 4vw, 40px);
+  display: grid; grid-template-columns: repeat(3, auto); gap: clamp(12px, 2.4vw, 24px) clamp(20px, 4vw, 44px);
+}
+.vel .sticker { width: clamp(92px, 14.5vw, 138px); height: auto; display: block; touch-action: none; cursor: grab; }
+.zweef { position: fixed; z-index: 20; pointer-events: none; transform: scale(1.15) rotate(-4deg); }
+.zweef.landt { transition: left .25s ease, top .25s ease, width .25s ease, transform .25s ease; transform: none; }
+
+#stickerbord { gap: 10px; }
+.bordkop { width: 100%; display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; }
+.duo.mini .dier { width: clamp(64px, 9vw, 92px); }
+.bordrijen { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: clamp(6px, 1.3vh, 12px); }
+.bordrij {
+  display: flex; align-items: center; gap: clamp(12px, 2.2vw, 22px);
+  background: rgba(255, 255, 255, .72); border-radius: 999px; padding: 8px clamp(14px, 2.4vw, 26px);
+}
+.bordrij.actief { background: #fff; box-shadow: 0 0 0 4px var(--paars); }
+.bordrij .vakje { width: clamp(58px, min(9.5vw, 9.2vh), 84px); height: clamp(58px, min(9.5vw, 9.2vh), 84px); }
+.levelnr {
+  width: 52px; height: 52px; border-radius: 50%; flex: none;
+  background: var(--paars); color: #fff; font-size: 28px; font-weight: 700;
+  display: grid; place-items: center;
+}
+.kroontje { width: 44px; font-size: 36px; text-align: center; visibility: hidden; }
+.bordrij.vol .kroontje { visibility: visible; }
+@media (prefers-reduced-motion: reduce) { .vakje, .strook { animation: none !important; } }

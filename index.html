@@ -10,9 +10,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/stijl.css?v=202611121430">
+<link rel="stylesheet" href="css/stijl.css?v=202611121804">
 </head>
-<body>
+<body data-vorm="alleen">
 
 <!-- Tekeningen: de eenhoorn en het knuffelkatje. Eén keer getekend, op meer plekken gebruikt. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -82,17 +82,11 @@
   <div class="kiesrij"><span class="label">Level</span><div class="kiezer" id="levels"></div></div>
   <div class="kiesrij"><span class="label">Ronde</span><div class="kiezer" id="rondes"></div></div>
   <p class="waar" id="waar"></p>
-  <div class="keuze">
-    <button class="vorm" id="kiesSamen">
-      <span class="plaatje" aria-hidden="true">👨‍👧</span>
-      <span class="naam">Samen</span>
-    </button>
-    <button class="vorm" id="kiesAlleen">
-      <span class="plaatje" aria-hidden="true">🧒</span>
-      <span class="naam">Alleen</span>
-    </button>
-  </div>
-  <p class="waar verborgen" id="alleenUitleg">Alleen spelen kan zodra de woorden van deze ronde zijn ingesproken.</p>
+  <button class="strook" id="naarBord" aria-label="Stickerbord"><span class="vakjes" id="ministickers"></span></button>
+  <button class="rond goed" id="speel" aria-label="Spelen">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z" fill="currentColor"/></svg>
+  </button>
+  <p class="waar verborgen" id="stilUitleg">Deze ronde is nog niet helemaal ingesproken. Bij woorden zonder opname slaat het spel het luisteren over.</p>
   <p class="fout verborgen" id="laadfout">De woorden konden niet geladen worden. Controleer de verbinding en herlaad de pagina.</p>
 </section>
 
@@ -132,11 +126,28 @@
     <button class="rond goed" id="verder" aria-label="Volgende ronde">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z" fill="currentColor"/></svg>
     </button>
+    <button class="rond plak wenk verborgen" id="naarSticker" aria-label="Sticker kiezen"><span>🎁</span></button>
     <button class="rond stil" id="klaarHuis" aria-label="Terug naar het begin"><span>⌂</span></button>
   </div>
 </section>
 
-<script>window.BALIMBA_VERSIE = "202611121430";</script>
-<script src="js/spel.js?v=202611121430"></script>
+<!-- Sticker kiezen en plakken -->
+<section id="kiezen" class="scherm verborgen">
+  <div class="bordrij actief"><span class="levelnr" id="kiesLevelNr"></span><div class="vakjes groot" id="kiesVakjes"></div></div>
+  <div class="vel" id="vel"></div>
+</section>
+
+<!-- Stickerbord -->
+<section id="stickerbord" class="scherm verborgen">
+  <header class="bordkop">
+    <button class="klein" id="bordHuis" aria-label="Terug naar het begin">⌂</button>
+    <div class="duo mini" aria-hidden="true"><svg class="dier"><use href="#t-eenhoorn"/></svg><svg class="dier"><use href="#t-kat"/></svg></div>
+    <span></span>
+  </header>
+  <div class="bordrijen" id="bordrijen"></div>
+</section>
+
+<script>window.BALIMBA_VERSIE = "202611121804";</script>
+<script src="js/spel.js?v=202611121804"></script>
 </body>
 </html>
