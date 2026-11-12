@@ -1,0 +1,76 @@
+{
+  "levels": [
+    {
+      "nummer": 1,
+      "naam": "mkmm- en mmkm-woorden",
+      "woorden": [
+        "wolk", "klop", "kruis", "werp", "rots", "plat", "smal", "vuist", "plaat", "knop",
+        "bloot", "vlam", "lust", "zulk", "woest", "zwom", "vals", "trui", "kruip", "sloop",
+        "kort", "klas", "plan", "welk", "slaan", "zwaar", "plek", "blik", "warm", "dorp",
+        "slaat", "kleur", "stoel", "vlak", "buurt", "slaap", "hulp", "blijk", "speel", "help",
+        "blok", "slok", "norm", "helm", "slap", "klik", "wraak", "klim", "stier", "blaas",
+        "post", "vlot", "plus", "plas", "steel", "spul", "tril", "slik", "vlek", "snuit"
+      ]
+    },
+    {
+      "nummer": 2,
+      "naam": "mmkmm-woorden 1",
+      "woorden": [
+        "briest", "sloopt", "bruist", "vlamt", "wist", "slijpt", "smult", "preuts", "slurp", "knelt",
+        "smeult", "stolp", "plens", "blits", "slokt", "blust", "kwijlt", "krols", "kwark", "plint",
+        "klont", "slipt", "kwaakt", "sjort", "klots", "kneust", "kluns", "kliert", "sjoelt", "trots",
+        "klopt", "stopt", "plant", "sport", "kwart", "klimt", "klant", "blaast", "zwemt", "plons",
+        "steunt", "trilt", "slikt", "stort", "brult", "kreunt", "steelt", "smelt", "klapt", "sleept",
+        "sluipt", "plukt", "triest", "vloekt", "plakt", "smolt", "klemt", "kleurt", "kromp", "vriest"
+      ]
+    },
+    {
+      "nummer": 3,
+      "naam": "mmkmm-woorden 2",
+      "woorden": [
+        "plaats", "blijkt", "speelt", "zwart", "slaapt", "trots", "klopt", "stopt", "plant", "sport",
+        "dwars", "plots", "storm", "stuurt", "kruipt", "kwart", "klimt", "klant", "blaast", "zwemt",
+        "kweekt", "klomp", "bloost", "bromt", "brons", "klets", "knalt", "knielt", "spoelt", "dwaalt",
+        "druipt", "speels", "knots", "zweert", "zwerm", "sleurt", "slaakt", "stomp", "klikt", "plons",
+        "plast", "kwast", "dreunt", "kwets", "sjaals", "spons", "speurt", "sliert", "propt", "bruusk",
+        "psalm", "zwiept", "klerk", "stolt", "krult", "knort", "sjokt", "blikt", "klamp", "treurt"
+      ]
+    },
+    {
+      "nummer": 4,
+      "naam": "twee- en drieletterclusters",
+      "woorden": [
+        "spriet", "winst", "ziekst", "plaatst", "struik", "smalst", "zwakst", "duurst", "blootst", "koelst",
+        "streelt", "straal", "worst", "domst", "trotst", "streel", "straalt", "dwarst", "spleet", "holst",
+        "laatst", "werkt", "helpt", "volst", "snelst", "dienst", "vormt", "straat", "borst", "diepst",
+        "zwaarst", "dorst", "stilst", "vorst", "werpt", "wenst", "klaarst", "leukst", "struik", "ruimst",
+        "stormt", "vuilst", "kaalst", "platst", "puurst", "prompt", "spruit", "bleekst", "stomst", "korst",
+        "botst", "slimst", "slapst", "dolst", "kletst", "strop", "spreuk", "zuurst", "vlotst", "bonst"
+      ]
+    },
+    {
+      "nummer": 5,
+      "naam": "samenstellingen 1",
+      "woorden": [
+        "buikpijn", "meetlat", "deurmat", "voorval", "boekdeel", "woonboot", "taalboek", "vaarwel", "huismus", "oprit",
+        "boothuis", "koolraap", "kooplui", "leesboek", "bieslook", "huiskat", "wijnboer", "valkuil", "huisvuil", "zestal",
+        "vuurzee", "zijlijn", "zeepbel", "waanzin", "huisdier", "doelwit", "leerboek", "rijles", "tuinman", "aanzien",
+        "haardos", "leenheer", "vulpen", "loopneus", "wasbak", "voorjaar", "voertaal", "wasbeer", "weerman", "balpen",
+        "zetmeel", "huisbaas", "looppas", "warboel", "rolluik", "buurlui", "aandeel", "topman", "paasvuur", "zeelui",
+        "wetboek", "zeedier", "aantal", "weekdier", "huilbui", "pakhuis", "zeurpiet", "muildier", "duikboot", "uithoek"
+      ]
+    },
+    {
+      "nummer": 6,
+      "naam": "samenstellingen 2",
+      "woorden": [
+        "kiespijn", "mijlpaal", "leeszaal", "domkop", "wijsneus", "tiental", "vuurpijl", "zeewier", "voorwiel", "koolmees",
+        "keelpijn", "balzaal", "viertal", "voordeel", "voetzool", "jaszak", "volzin", "wartaal", "potvis", "eetzaal",
+        "oordeel", "koopwaar", "woonhuis", "heelal", "koolzuur", "buurman", "zeepsop", "rotzak", "zuurkool", "huisdeur",
+        "poolijs", "moestuin", "leerjaar", "voetbal", "voordeur", "bijles", "haarlok", "kerkuil", "deurbel", "zijdeur",
+        "voortuin", "welzijn", "weerzin", "jaartal", "puinhoop", "aanval", "poolvos", "tuindeur", "oorlel", "weeshuis",
+        "oorbel", "jukbeen", "voorruit", "vaktaal", "koprol", "woonwijk", "vaklui", "loopbaan", "waslijn", "woonboot"
+      ]
+    }
+  ]
+}

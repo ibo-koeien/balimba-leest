@@ -1,0 +1,187 @@
+:root {
+  --lucht-boven: #cfe4ff;
+  --lucht-onder: #f6dcff;
+  --inkt: #2b1b4a;
+  --zacht: #6c5c8c;
+  --kaart: #ffffff;
+  --rand: #e3d6f7;
+  --paars: #8a4fff;
+  --paars-diep: #5d2fc4;
+  --groen: #23a973;
+  --groen-diep: #167a52;
+  --oranje: #f29a2e;
+  --oranje-diep: #b96d12;
+  --goud: #ffc21a;
+  --leeg: #d9cdee;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, var(--lucht-boven), var(--lucht-onder)) fixed;
+  color: var(--inkt);
+  font-family: "Andika", "Chalkboard SE", "Comic Sans MS", system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  overflow: hidden;
+}
+
+button { font: inherit; color: inherit; cursor: pointer; border: none; touch-action: manipulation; }
+
+.verborgen { display: none !important; }
+
+.scherm {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(16px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
+}
+
+/* Beginscherm */
+#start, #klaar { justify-content: center; gap: 20px; text-align: center; }
+h1 { margin: 0; font-size: clamp(36px, 7vw, 60px); }
+.waar { margin: 0; font-size: 20px; color: var(--zacht); }
+.fout { background: #fff3e6; border: 2px solid var(--oranje); border-radius: 16px; padding: 14px 18px; max-width: 480px; }
+
+.eenhoorn { font-size: 54px; line-height: 1; transition: transform .25s; }
+.eenhoorn.groot { font-size: clamp(110px, 22vw, 180px); }
+.eenhoorn.blij { animation: spring .6s ease; }
+.eenhoorn.moedig { animation: knik .7s ease; }
+.eenhoorn.dans { animation: dans 1.6s ease-in-out infinite; }
+
+.keuze { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; align-items: center; margin-top: 12px; }
+
+.vorm {
+  width: min(40vw, 230px);
+  padding: 22px 12px 18px;
+  background: var(--kaart);
+  border: 4px solid var(--rand);
+  border-radius: 32px;
+  box-shadow: 0 8px 0 var(--rand);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.vorm:active { transform: translateY(6px); box-shadow: 0 2px 0 var(--rand); }
+.vorm .plaatje { font-size: clamp(64px, 12vw, 96px); line-height: 1.1; }
+.vorm .naam { font-size: 26px; font-weight: 700; }
+
+/* Spelscherm */
+#spel header {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 64px 1fr 64px;
+  align-items: center;
+  gap: 8px;
+}
+#spel header .eenhoorn { justify-self: end; }
+
+.klein {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(255, 255, 255, .7);
+  font-size: 28px; color: var(--zacht);
+}
+
+.sterren { display: flex; justify-content: center; gap: clamp(2px, 1vw, 10px); flex-wrap: wrap; }
+.ster {
+  font-size: clamp(30px, 5.6vw, 50px);
+  line-height: 1;
+  color: var(--leeg);
+  transition: color .2s, transform .3s;
+}
+.ster.vol { color: var(--goud); text-shadow: 0 2px 0 #d99a00; transform: scale(1.12); }
+.sterren.eind .ster { font-size: clamp(34px, 6.4vw, 60px); }
+
+.midden { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; }
+
+.woord {
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: .03em;
+  background: var(--kaart);
+  border: 5px solid var(--rand);
+  border-radius: 40px;
+  padding: .18em .5em .24em;
+  max-width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 10px 0 var(--rand);
+}
+.woord.kort { font-size: clamp(96px, 24vw, 230px); }
+.woord.lang { font-size: clamp(64px, 15.5vw, 170px); }
+.woord.komt { animation: komt .35s ease; }
+.woord.wiebel { animation: wiebel .45s ease; }
+.woord.raak { border-color: var(--groen); box-shadow: 0 10px 0 #bfe9d6; }
+.woord.terug { border-style: dashed; }
+
+.knoppen {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  min-height: 150px;
+}
+
+.rond {
+  width: clamp(104px, 20vw, 140px);
+  height: clamp(104px, 20vw, 140px);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: #fff;
+  font-size: clamp(52px, 9vw, 68px);
+  transition: transform .08s, box-shadow .08s, opacity .2s;
+}
+.rond svg { width: 56%; height: 56%; }
+.rond:active { transform: translateY(7px); }
+.rond.goed { background: var(--groen); box-shadow: 0 9px 0 var(--groen-diep); }
+.rond.goed:active { box-shadow: 0 2px 0 var(--groen-diep); }
+.rond.opnieuw { background: var(--oranje); box-shadow: 0 9px 0 var(--oranje-diep); }
+.rond.opnieuw:active { box-shadow: 0 2px 0 var(--oranje-diep); }
+.rond.oor { background: var(--paars); box-shadow: 0 9px 0 var(--paars-diep); }
+.rond.oor:active { box-shadow: 0 2px 0 var(--paars-diep); }
+.rond.stil { background: rgba(255, 255, 255, .8); color: var(--zacht); box-shadow: 0 9px 0 var(--rand); }
+.rond.onzichtbaar { visibility: hidden; }
+.rond.bijzaak { width: 84px; height: 84px; font-size: 40px; opacity: .85; }
+.rond.wenk { animation: wenk 1.4s ease-in-out infinite; }
+
+/* Vinkje voor de ouder, duimpje voor Celeste */
+.duim { display: none; }
+body[data-vorm="alleen"] .goed .vink { display: none; }
+body[data-vorm="alleen"] .goed .duim { display: inline; }
+
+/* Vliegende ster */
+.vlieg {
+  position: fixed; left: 0; top: 0;
+  font-size: 110px; line-height: 1;
+  color: var(--goud); text-shadow: 0 3px 0 #d99a00;
+  pointer-events: none; z-index: 10;
+  transition: transform .55s cubic-bezier(.5, -0.2, .4, 1), opacity .55s;
+}
+.vonk {
+  position: fixed; font-size: 36px; pointer-events: none; z-index: 10;
+  animation: vonk .7s ease-out forwards;
+}
+
+@keyframes komt { from { transform: scale(.82); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes wiebel { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-2.5deg); } 75% { transform: rotate(2.5deg); } }
+@keyframes spring { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-16px) rotate(-8deg); } }
+@keyframes knik { 0%,100% { transform: rotate(0); } 30% { transform: rotate(12deg); } 60% { transform: rotate(-6deg); } }
+@keyframes dans { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-18px) rotate(6deg); } }
+@keyframes wenk { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+@keyframes vonk { from { transform: translate(0, 0) scale(.6); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .eenhoorn, .woord, .rond, .vonk { animation: none !important; }
+  .vlieg { transition: none; }
+}
+
+@media (max-height: 520px) {
+  .knoppen { min-height: 112px; }
+  .woord.kort { font-size: clamp(72px, 17vw, 150px); }
+  .woord.lang { font-size: clamp(54px, 12vw, 120px); }
+}
