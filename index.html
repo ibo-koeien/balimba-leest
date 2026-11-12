@@ -14,9 +14,70 @@
 </head>
 <body>
 
+<!-- Tekeningen: de eenhoorn en het knuffelkatje. Eén keer getekend, op meer plekken gebruikt. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="t-eenhoorn" viewBox="0 0 160 150">
+    <path d="M40 66 C16 54 18 22 46 22 C52 4 82 4 88 22 C70 24 56 38 52 56 Z" fill="#ff8fc7"/>
+    <path d="M36 88 C14 84 10 56 30 46 C30 62 38 70 46 76 Z" fill="#b78bff"/>
+    <path d="M50 46 L56 14 L78 38 Z" fill="#fff" stroke="#d9cdee" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M110 46 L104 14 L82 38 Z" fill="#fff" stroke="#d9cdee" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M57 38 L59 24 L68 35 Z" fill="#ffd3e6"/><path d="M103 38 L101 24 L92 35 Z" fill="#ffd3e6"/>
+    <ellipse cx="80" cy="84" rx="46" ry="43" fill="#fff" stroke="#d9cdee" stroke-width="3"/>
+    <path d="M80 2 L69 46 Q80 52 91 46 Z" fill="#ffd24a" stroke="#e0a800" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M76 20 L85 17 M73 31 L88 27 M71 41 L90 37" stroke="#e0a800" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M56 54 C60 38 72 44 70 52 C78 40 96 42 104 56 C92 50 70 50 56 54 Z" fill="#ff8fc7"/>
+    <ellipse cx="80" cy="106" rx="27" ry="17" fill="#ffe3f1"/>
+    <circle cx="71" cy="105" r="2.8" fill="#c98aa8"/><circle cx="89" cy="105" r="2.8" fill="#c98aa8"/>
+    <path d="M72 113 Q80 119 88 113" fill="none" stroke="#c98aa8" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="61" cy="80" r="6.8" fill="#2b1b4a"/><circle cx="63.4" cy="77.6" r="2.3" fill="#fff"/>
+    <circle cx="99" cy="80" r="6.8" fill="#2b1b4a"/><circle cx="101.4" cy="77.6" r="2.3" fill="#fff"/>
+    <circle cx="45" cy="96" r="7" fill="#ffc2dc" opacity=".85"/><circle cx="115" cy="96" r="7" fill="#ffc2dc" opacity=".85"/>
+    <rect x="32" y="116" width="32" height="32" rx="14" fill="#fff" stroke="#d9cdee" stroke-width="3"/>
+    <rect x="96" y="116" width="32" height="32" rx="14" fill="#fff" stroke="#d9cdee" stroke-width="3"/>
+    <path d="M35 138 H61 Q60 147 48 147 Q36 147 35 138 Z" fill="#c9b6f2"/>
+    <path d="M99 138 H125 Q124 147 112 147 Q100 147 99 138 Z" fill="#c9b6f2"/>
+  </symbol>
+  <symbol id="t-kat" viewBox="0 0 160 150">
+    <path d="M36 62 L38 18 L76 42 Z" fill="#f6b26b" stroke="#d98f3f" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M124 62 L122 18 L84 42 Z" fill="#f6b26b" stroke="#d98f3f" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M45 50 L46 30 L62 41 Z" fill="#ffd3e0"/><path d="M115 50 L114 30 L98 41 Z" fill="#ffd3e0"/>
+    <ellipse cx="80" cy="86" rx="50" ry="41" fill="#f6b26b" stroke="#d98f3f" stroke-width="3"/>
+    <path d="M80 47 V60 M67 49 L69 60 M93 49 L91 60" stroke="#d98f3f" stroke-width="4" stroke-linecap="round"/>
+    <path d="M124 74 q6 12 0 26" fill="none" stroke="#d98f3f" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1 6"/>
+    <ellipse cx="80" cy="103" rx="23" ry="15" fill="#fff3e0"/>
+    <path d="M74.5 96 H85.5 L80 102.5 Z" fill="#ff8fab" stroke="#ff8fab" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M80 103 q-5 7 -11 3 M80 103 q5 7 11 3" fill="none" stroke="#8a5a2b" stroke-width="2.3" stroke-linecap="round"/>
+    <circle cx="59" cy="82" r="6.8" fill="#2b1b4a"/><circle cx="61.4" cy="79.6" r="2.3" fill="#fff"/>
+    <circle cx="101" cy="82" r="6.8" fill="#2b1b4a"/><circle cx="103.4" cy="79.6" r="2.3" fill="#fff"/>
+    <path d="M50 100 l-19 -4 M50 106 l-19 3 M110 100 l19 -4 M110 106 l19 3" stroke="#8a5a2b" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="44" cy="96" r="6.5" fill="#ffb3c7" opacity=".7"/><circle cx="116" cy="96" r="6.5" fill="#ffb3c7" opacity=".7"/>
+    <rect x="31" y="116" width="34" height="32" rx="15" fill="#f6b26b" stroke="#d98f3f" stroke-width="3"/>
+    <rect x="95" y="116" width="34" height="32" rx="15" fill="#f6b26b" stroke="#d98f3f" stroke-width="3"/>
+    <path d="M42 136 v8 M54 136 v8 M106 136 v8 M118 136 v8" stroke="#d98f3f" stroke-width="2.4" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<!-- Achtergrond: lucht, wolken, regenboog en heuvels -->
+<svg class="landschap" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <g fill="none" stroke-width="16" opacity=".55">
+    <circle cx="800" cy="640" r="270" stroke="#ff9db5"/><circle cx="800" cy="640" r="254" stroke="#ffc98a"/>
+    <circle cx="800" cy="640" r="238" stroke="#fff0a3"/><circle cx="800" cy="640" r="222" stroke="#b6eab8"/>
+    <circle cx="800" cy="640" r="206" stroke="#a9d4ff"/><circle cx="800" cy="640" r="190" stroke="#cdb4ff"/>
+  </g>
+  <g fill="#fff" opacity=".85">
+    <path d="M90 190 a34 34 0 0 1 62 -18 a44 44 0 0 1 82 14 a30 30 0 0 1 -6 60 h-126 a30 30 0 0 1 -12 -56z"/>
+    <path d="M700 120 a26 26 0 0 1 48 -14 a34 34 0 0 1 64 10 a23 23 0 0 1 -4 46 h-98 a23 23 0 0 1 -10 -42z"/>
+    <path d="M430 300 a20 20 0 0 1 36 -10 a26 26 0 0 1 48 8 a18 18 0 0 1 -4 36 h-74 a18 18 0 0 1 -6 -34z" opacity=".7"/>
+  </g>
+  <path d="M0 560 Q180 470 380 540 T760 520 T1000 550 V700 H0 Z" fill="#cfeed6"/>
+  <path d="M0 620 Q220 540 460 610 T1000 600 V700 H0 Z" fill="#b4e3c2"/>
+  <g fill="#fff"><circle cx="120" cy="640" r="5"/><circle cx="310" cy="668" r="5"/><circle cx="640" cy="650" r="5"/><circle cx="880" cy="672" r="5"/></g>
+  <g fill="#ffb3d1"><circle cx="210" cy="676" r="5"/><circle cx="520" cy="680" r="5"/><circle cx="760" cy="640" r="5"/></g>
+</svg>
+
 <!-- Beginscherm -->
 <section id="start" class="scherm">
-  <div class="eenhoorn groot" aria-hidden="true">🦄</div>
+  <div class="duo" aria-hidden="true"><svg class="dier"><use href="#t-eenhoorn"/></svg><svg class="dier"><use href="#t-kat"/></svg></div>
   <h1>Balimba leest</h1>
   <div class="kiesrij"><span class="label">Level</span><div class="kiezer" id="levels"></div></div>
   <div class="kiesrij"><span class="label">Ronde</span><div class="kiezer" id="rondes"></div></div>
@@ -40,11 +101,15 @@
   <header>
     <button class="klein" id="naarHuis" aria-label="Terug naar het begin">⌂</button>
     <div class="sterren" id="sterren" aria-label="Sterren"></div>
-    <div class="eenhoorn" id="eenhoorn" aria-hidden="true">🦄</div>
+    <span></span>
   </header>
 
   <div class="midden">
-    <div class="woord" id="woord"></div>
+    <div class="bord">
+      <svg class="dier houdt links" aria-hidden="true"><use href="#t-eenhoorn"/></svg>
+      <svg class="dier houdt rechts" aria-hidden="true"><use href="#t-kat"/></svg>
+      <div class="woord" id="woord"></div>
+    </div>
   </div>
 
   <footer class="knoppen">
@@ -61,7 +126,7 @@
 
 <!-- Ronde klaar -->
 <section id="klaar" class="scherm verborgen">
-  <div class="eenhoorn groot dans" aria-hidden="true">🦄</div>
+  <div class="duo dans" aria-hidden="true"><svg class="dier"><use href="#t-eenhoorn"/></svg><svg class="dier"><use href="#t-kat"/></svg></div>
   <div class="sterren eind" id="eindsterren" aria-hidden="true"></div>
   <div class="keuze">
     <button class="rond goed" id="verder" aria-label="Volgende ronde">

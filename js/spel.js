@@ -141,6 +141,16 @@
     el.classList.add(klas);
   }
 
+  // De eenhoorn en het katje die het bord vasthouden, reageren samen.
+  function dieren(klas) {
+    document.querySelectorAll("#spel .dier").forEach((d) => {
+      d.classList.remove("blij", "moedig");
+      void d.getBoundingClientRect();
+      d.classList.add(klas);
+      d.addEventListener("animationend", () => d.classList.remove(klas), { once: true });
+    });
+  }
+
   function aantalRondes(level) {
     return Math.ceil(woorden.levels[level].woorden.length / inst.rondeGrootte);
   }
@@ -276,7 +286,7 @@
     const slot = $("sterren").children[st.sterren];
     st.sterren++;
     belletje();
-    speelAf($("eenhoorn"), "blij");
+    dieren("blij");
     if (!slot) return;
 
     const weg = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -303,7 +313,7 @@
   // Een woord dat terugkwam en nu goed ging: geen nieuwe ster, wel een beetje feest.
   function vonken() {
     belletje();
-    speelAf($("eenhoorn"), "blij");
+    dieren("blij");
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const r = $("woord").getBoundingClientRect();
     for (let i = 0; i < 6; i++) {
@@ -346,7 +356,7 @@
     if (!st || st.bezig) return;
     const item = nu();
     speelAf($("woord"), "wiebel");
-    speelAf($("eenhoorn"), "moedig");
+    dieren("moedig");
 
     if (st.vorm === "samen") {
       st.pogingen++;

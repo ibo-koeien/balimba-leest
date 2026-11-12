@@ -35,7 +35,10 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; touch-act
 
 .verborgen { display: none !important; }
 
+.landschap { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
 .scherm {
+  position: relative; z-index: 1;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -124,6 +127,26 @@ h1 { margin: 0; font-size: clamp(36px, 7vw, 60px); }
   white-space: nowrap;
   box-shadow: 0 10px 0 var(--rand);
 }
+.woord { min-width: min(78vw, 460px); position: relative; z-index: 1; }
+
+/* Het bord met de twee dieren die het vasthouden */
+.bord { position: relative; display: inline-block; max-width: 100%; margin-top: clamp(84px, 13vw, 128px); }
+.dier { width: clamp(108px, 17vw, 168px); aspect-ratio: 160 / 150; overflow: visible; }
+.dier.houdt {
+  position: absolute; z-index: 2;
+  bottom: calc(100% - clamp(20px, 3.2vw, 30px));
+  transform-origin: 50% 100%;
+  animation: dobber 3.2s ease-in-out infinite;
+}
+.dier.houdt.links { left: 5%; }
+.dier.houdt.rechts { right: 5%; animation-delay: -1.6s; }
+.dier.blij { animation: hup .6s ease; }
+.dier.moedig { animation: knik .7s ease; }
+.duo { display: flex; gap: 8px; justify-content: center; align-items: flex-end; }
+.duo .dier { width: clamp(110px, 18vw, 170px); }
+.duo.dans .dier { animation: dans 1.6s ease-in-out infinite; }
+.duo.dans .dier:last-child { animation-delay: -.8s; }
+
 .woord.kort { font-size: clamp(96px, 24vw, 230px); }
 .woord.lang { font-size: clamp(64px, 15.5vw, 170px); }
 .woord.komt { animation: komt .35s ease; }
@@ -149,7 +172,8 @@ h1 { margin: 0; font-size: clamp(36px, 7vw, 60px); }
   font-size: clamp(52px, 9vw, 68px);
   transition: transform .08s, box-shadow .08s, opacity .2s;
 }
-.rond svg { width: 56%; height: 56%; }
+/* Vaste maat: Safari tekent een svg met een maat in procenten hier niet. */
+.rond svg { display: block; width: clamp(58px, 11vw, 78px); height: clamp(58px, 11vw, 78px); }
 .rond:active { transform: translateY(7px); }
 .rond.goed { background: var(--groen); box-shadow: 0 9px 0 var(--groen-diep); }
 .rond.goed:active { box-shadow: 0 2px 0 var(--groen-diep); }
@@ -180,6 +204,8 @@ body[data-vorm="alleen"] .goed .duim { display: inline; }
   animation: vonk .7s ease-out forwards;
 }
 
+@keyframes dobber { 0%,100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-5px) rotate(1.5deg); } }
+@keyframes hup { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-22px) rotate(-6deg); } 70% { transform: translateY(-6px) rotate(4deg); } }
 @keyframes komt { from { transform: scale(.82); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes wiebel { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-2.5deg); } 75% { transform: rotate(2.5deg); } }
 @keyframes spring { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-16px) rotate(-8deg); } }
@@ -189,7 +215,7 @@ body[data-vorm="alleen"] .goed .duim { display: inline; }
 @keyframes vonk { from { transform: translate(0, 0) scale(.6); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .eenhoorn, .woord, .rond, .vonk { animation: none !important; }
+  .eenhoorn, .dier, .woord, .rond, .vonk { animation: none !important; }
   .vlieg { transition: none; }
 }
 
