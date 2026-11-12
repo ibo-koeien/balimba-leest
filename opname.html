@@ -46,6 +46,7 @@
   <p class="uitleg">
     Spreek elk woord rustig en vriendelijk in: bij korte woorden eerst zoemend, dan het hele woord
     (<i>mmm-aaa-n … maan</i>). De opnames blijven in deze browser bewaard, dus je kunt stoppen en later verdergaan.
+    Een woord dat in meer levels staat, hoef je maar één keer in te spreken.
     Download een deel als het af is en stuur het zipbestand naar Claude.
   </p>
   <div class="melding verborgen" id="melding"></div>
@@ -136,10 +137,10 @@
     const zinnen = [];
     for (const soort of Object.keys(inst.zinnen)) for (const z of inst.zinnen[soort]) zinnen.push({ sleutel: "z:" + z.id, tekst: z.tekst, zin: true });
     delen = [{ id: "zinnen", naam: "Zinnen", items: zinnen }];
-    const gehad = new Set();
+    // Elk level toont al zijn woorden. Een woord dat in meer levels staat, hoef je maar één keer
+    // in te spreken: de opname hoort bij het woord en telt dan overal mee.
     for (const lvl of w.levels) {
-      const items = [];
-      for (const woord of lvl.woorden) { if (gehad.has(woord)) continue; gehad.add(woord); items.push({ sleutel: "w:" + woord, tekst: woord, zin: false }); }
+      const items = lvl.woorden.map((woord) => ({ sleutel: "w:" + woord, tekst: woord, zin: false }));
       delen.push({ id: "level" + lvl.nummer, naam: "Level " + lvl.nummer, items });
     }
   }
@@ -244,7 +245,10 @@
 
   async function download() {
     const deel = delen[deelNr], bestanden = [];
+    const gehad = new Set();
     for (const item of deel.items) {
+      if (gehad.has(item.sleutel)) continue;
+      gehad.add(item.sleutel);
       const op = await haal(item.sleutel);
       if (!op) continue;
       const map = item.sleutel.startsWith("z:") ? "zinnen/" : "woorden/";

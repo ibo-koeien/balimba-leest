@@ -44,9 +44,21 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; touch-act
 }
 
 /* Beginscherm */
-#start, #klaar { justify-content: center; gap: 20px; text-align: center; }
+#start, #klaar { justify-content: center; gap: 16px; text-align: center; }
+#start .eenhoorn.groot { font-size: clamp(80px, 14vw, 130px); }
 h1 { margin: 0; font-size: clamp(36px, 7vw, 60px); }
 .waar { margin: 0; font-size: 20px; color: var(--zacht); }
+.kiesrij { display: flex; align-items: center; gap: 14px; }
+.kiesrij .label { width: 64px; text-align: right; font-size: 20px; color: var(--zacht); }
+.kiezer { display: flex; gap: 10px; }
+.kies {
+  position: relative;
+  width: 58px; height: 58px; border-radius: 18px;
+  background: var(--kaart); border: 3px solid var(--rand);
+  font-size: 26px; font-weight: 700;
+}
+.kies.actief { background: var(--paars); border-color: var(--paars); color: #fff; }
+.kies.gedaan::after { content: "★"; position: absolute; top: -12px; right: -8px; font-size: 22px; color: var(--goud); text-shadow: 0 1px 0 #d99a00; }
 .fout { background: #fff3e6; border: 2px solid var(--oranje); border-radius: 16px; padding: 14px 18px; max-width: 480px; }
 
 .eenhoorn { font-size: 54px; line-height: 1; transition: transform .25s; }

@@ -150,13 +150,43 @@
     return woorden.levels[plek.level].woorden.slice(plek.ronde * n, (plek.ronde + 1) * n);
   }
 
+  // Alleen spelen kan pas als elk woord van deze ronde een opname heeft (of de computerstem aan staat).
+  function kanAlleen() { return inst.computerstem || rondeWoorden().every(heeftWoord); }
+
+  // Rij genummerde knoppen om een level of een ronde te kiezen. Een ster = die ronde is al eens gespeeld.
+  function vulKiezer(el, aantal, actief, heeftSter, opKies) {
+    el.innerHTML = "";
+    for (let i = 0; i < aantal; i++) {
+      const b = document.createElement("button");
+      b.className = "kies" + (i === actief ? " actief" : "") + (heeftSter(i) ? " gedaan" : "");
+      b.textContent = String(i + 1);
+      b.addEventListener("click", () => opKies(i));
+      el.appendChild(b);
+    }
+  }
+
+  function bewaarPlek() {
+    const perLevel = opslag.lees("balimba.rondePerLevel", {});
+    perLevel[plek.level] = plek.ronde;
+    opslag.schrijf("balimba.rondePerLevel", perLevel);
+    opslag.schrijf("balimba.plek", plek);
+  }
+  function kiesLevel(i) {
+    const perLevel = opslag.lees("balimba.rondePerLevel", {});
+    plek = { level: i, ronde: Math.min(perLevel[i] || 0, aantalRondes(i) - 1) };
+    bewaarPlek(); vulStart();
+  }
+  function kiesRonde(r) { plek.ronde = r; bewaarPlek(); vulStart(); }
+
   function vulStart() {
     const lvl = woorden.levels[plek.level];
-    $("waar").textContent = "Level " + lvl.nummer + " · ronde " + (plek.ronde + 1) + " van " + aantalRondes(plek.level);
-    // Alleen spelen kan pas als elk woord van deze ronde een opname heeft (of de computerstem aan staat).
-    const kanAlleen = inst.computerstem || rondeWoorden().every(heeftWoord);
-    $("kiesAlleen").disabled = !kanAlleen;
-    $("alleenUitleg").classList.toggle("verborgen", kanAlleen);
+    $("waar").textContent = lvl.naam;
+    const gedaan = opslag.lees("balimba.gedaan", {});
+    vulKiezer($("levels"), woorden.levels.length, plek.level, () => false, kiesLevel);
+    vulKiezer($("rondes"), aantalRondes(plek.level), plek.ronde, (r) => !!gedaan[plek.level + "-" + r], kiesRonde);
+    const mag = kanAlleen();
+    $("kiesAlleen").disabled = !mag;
+    $("alleenUitleg").classList.toggle("verborgen", mag);
   }
 
   function maakSterren(el, aantal, vol) {
@@ -352,12 +382,15 @@
     setTimeout(() => zegZin("rondeKlaar"), 900);
 
     // Volgende ronde klaarzetten; na de laatste ronde van een level door naar het volgende level.
+    const gedaan = opslag.lees("balimba.gedaan", {});
+    gedaan[plek.level + "-" + plek.ronde] = (gedaan[plek.level + "-" + plek.ronde] || 0) + 1;
+    opslag.schrijf("balimba.gedaan", gedaan);
     plek.ronde++;
     if (plek.ronde >= aantalRondes(plek.level)) {
       plek.ronde = 0;
       plek.level = (plek.level + 1) % woorden.levels.length;
     }
-    opslag.schrijf("balimba.plek", plek);
+    bewaarPlek();
   }
 
   function naarStart() {
@@ -395,7 +428,10 @@
   $("oor").addEventListener("click", opOor);
   $("naarHuis").addEventListener("click", naarStart);
   $("klaarHuis").addEventListener("click", naarStart);
-  $("verder").addEventListener("click", () => startRonde(laatsteVorm));
+  // Door naar de volgende ronde. Heeft die nog geen opnames, dan eerst terug naar het begin.
+  $("verder").addEventListener("click", () => {
+    if (laatsteVorm === "alleen" && !kanAlleen()) naarStart(); else startRonde(laatsteVorm);
+  });
 
   laad();
 })();
