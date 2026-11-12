@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balimba leest – opnames</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --inkt:#2b1b4a; --zacht:#6c5c8c; --kaart:#fff; --rand:#e3d6f7; --paars:#8a4fff; --rood:#e0457b; --groen:#23a973; --bg:#f6f0ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--inkt); font-family: system-ui, -apple-system, sans-serif; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 20px 16px 60px; }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  p.uitleg { margin: 0 0 16px; color: var(--zacht); line-height: 1.45; }
+  .delen { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+  .deel { font:inherit; padding:8px 12px; border-radius:12px; border:2px solid var(--rand); background:var(--kaart); color:var(--inkt); cursor:pointer; }
+  .deel.actief { border-color:var(--paars); background:#efe6ff; font-weight:600; }
+  .deel.af { border-color:var(--groen); }
+  .podium { background:var(--kaart); border:2px solid var(--rand); border-radius:24px; padding:24px 16px; text-align:center; }
+  .teller { color:var(--zacht); font-size:15px; }
+  .tekst { font-family:"Andika","Chalkboard SE",sans-serif; font-weight:700; font-size: clamp(44px, 11vw, 96px); line-height:1.2; margin: 10px 0 4px; overflow-wrap:anywhere; }
+  .tekst.zin { font-size: clamp(26px, 5vw, 40px); }
+  .tip { color:var(--zacht); min-height: 22px; margin-bottom: 14px; }
+  .rij { display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap; }
+  button.actie { font:inherit; font-size:18px; padding:14px 22px; border-radius:16px; border:2px solid var(--rand); background:var(--kaart); color:var(--inkt); cursor:pointer; min-width:128px; }
+  button.actie:disabled { opacity:.4; cursor:default; }
+  button.opnemen { background:var(--rood); border-color:var(--rood); color:#fff; font-weight:600; min-width:190px; }
+  button.opnemen.loopt { animation: puls 1s ease-in-out infinite; }
+  button.volgende { background:var(--paars); border-color:var(--paars); color:#fff; font-weight:600; }
+  @keyframes puls { 50% { transform: scale(1.05); } }
+  .sneltoets { color:var(--zacht); font-size:13px; margin-top:12px; }
+  .lijst { display:flex; flex-wrap:wrap; gap:6px; margin-top:18px; }
+  .chip { font:inherit; font-size:15px; padding:5px 10px; border-radius:999px; border:1.5px solid var(--rand); background:var(--kaart); color:var(--inkt); cursor:pointer; }
+  .chip.klaar { background:#e3f6ed; border-color:#9bd9bd; }
+  .chip.nu { outline:3px solid var(--paars); outline-offset:1px; }
+  .onder { margin-top:22px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .melding { background:#fff3e6; border:2px solid #f29a2e; border-radius:14px; padding:12px 16px; margin-bottom:16px; }
+  .verborgen { display:none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Opnames voor Balimba leest</h1>
+  <p class="uitleg">
+    Spreek elk woord rustig en vriendelijk in: bij korte woorden eerst zoemend, dan het hele woord
+    (<i>mmm-aaa-n … maan</i>). De opnames blijven in deze browser bewaard, dus je kunt stoppen en later verdergaan.
+    Download een deel als het af is en stuur het zipbestand naar Claude.
+  </p>
+  <div class="melding verborgen" id="melding"></div>
+
+  <div class="delen" id="delen"></div>
+
+  <div class="podium">
+    <div class="teller" id="teller"></div>
+    <div class="tekst" id="tekst"></div>
+    <div class="tip" id="tip"></div>
+    <div class="rij">
+      <button class="actie" id="vorige">← Vorige</button>
+      <button class="actie opnemen" id="opnemen">● Opnemen</button>
+      <button class="actie" id="luister" disabled>▶ Luister</button>
+      <button class="actie volgende" id="volgende">Volgende →</button>
+    </div>
+    <div class="sneltoets">Toetsenbord: spatie = opnemen / stoppen · Enter of → = volgende · ← = vorige · L = luisteren</div>
+  </div>
+
+  <div class="lijst" id="lijst"></div>
+
+  <div class="onder">
+    <button class="actie" id="download">Download dit deel (zip)</button>
+    <span id="downloadinfo" class="teller"></span>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- Bewaren in de browser (IndexedDB) ----------
+  let db = null;
+  function openDb() {
+    return new Promise((ok, fout) => {
+      const r = indexedDB.open("balimba-opnames", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("opnames");
+      r.onsuccess = () => ok(r.result);
+      r.onerror = () => fout(r.error);
+    });
+  }
+  const tx = (soort) => db.transaction("opnames", soort).objectStore("opnames");
+  const wacht = (r) => new Promise((ok, fout) => { r.onsuccess = () => ok(r.result); r.onerror = () => fout(r.error); });
+  const bewaar = (sleutel, waarde) => wacht(tx("readwrite").put(waarde, sleutel));
+  const haal = (sleutel) => wacht(tx("readonly").get(sleutel));
+  const alleSleutels = () => wacht(tx("readonly").getAllKeys());
+
+  // ---------- Zip maken (zonder compressie, geen bibliotheek nodig) ----------
+  const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc32(u8) { let c = 0xffffffff; for (let i = 0; i < u8.length; i++) c = CRC[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; }
+  function maakZip(bestanden) {
+    const enc = new TextEncoder(), delen = [], centraal = [];
+    let plek = 0, centraalGrootte = 0;
+    for (const b of bestanden) {
+      const naam = enc.encode(b.naam), crc = crc32(b.data), n = b.data.length;
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+      lh.setUint16(8, 0, true); lh.setUint16(10, 0, true); lh.setUint16(12, 0x21, true);
+      lh.setUint32(14, crc, true); lh.setUint32(18, n, true); lh.setUint32(22, n, true);
+      lh.setUint16(26, naam.length, true); lh.setUint16(28, 0, true);
+      delen.push(lh.buffer, naam, b.data);
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+      ch.setUint16(10, 0, true); ch.setUint16(12, 0, true); ch.setUint16(14, 0x21, true);
+      ch.setUint32(16, crc, true); ch.setUint32(20, n, true); ch.setUint32(24, n, true);
+      ch.setUint16(28, naam.length, true); ch.setUint32(42, plek, true);
+      centraal.push(ch.buffer, naam);
+      plek += 30 + naam.length + n; centraalGrootte += 46 + naam.length;
+    }
+    const eind = new DataView(new ArrayBuffer(22));
+    eind.setUint32(0, 0x06054b50, true); eind.setUint16(8, bestanden.length, true); eind.setUint16(10, bestanden.length, true);
+    eind.setUint32(12, centraalGrootte, true); eind.setUint32(16, plek, true);
+    return new Blob([...delen, ...centraal, eind.buffer], { type: "application/zip" });
+  }
+  window.__maakZip = maakZip;   // voor de test
+
+  // ---------- De delen: zinnen en woorden per level ----------
+  let delen = [];        // [{ id, naam, items: [{ sleutel, tekst, zin }] }]
+  let klaar = new Set(); // sleutels met een opname
+  let deelNr = 0, itemNr = 0;
+
+  async function laadInhoud() {
+    const [w, inst] = await Promise.all([
+      fetch("data/woorden.json").then((r) => r.json()),
+      fetch("data/instellingen.json").then((r) => r.json())
+    ]);
+    const zinnen = [];
+    for (const soort of Object.keys(inst.zinnen)) for (const z of inst.zinnen[soort]) zinnen.push({ sleutel: "z:" + z.id, tekst: z.tekst, zin: true });
+    delen = [{ id: "zinnen", naam: "Zinnen", items: zinnen }];
+    const gehad = new Set();
+    for (const lvl of w.levels) {
+      const items = [];
+      for (const woord of lvl.woorden) { if (gehad.has(woord)) continue; gehad.add(woord); items.push({ sleutel: "w:" + woord, tekst: woord, zin: false }); }
+      delen.push({ id: "level" + lvl.nummer, naam: "Level " + lvl.nummer, items });
+    }
+  }
+
+  // ---------- Opnemen ----------
+  let stroom = null, recorder = null, brokken = [], loopt = false, speler = null;
+  const soort = (() => {
+    if (!window.MediaRecorder) return null;
+    for (const t of ["audio/mp4", "audio/webm;codecs=opus", "audio/webm", "audio/ogg"]) if (MediaRecorder.isTypeSupported(t)) return t;
+    return "";
+  })();
+  const extensie = (mime) => mime.includes("mp4") ? "m4a" : mime.includes("ogg") ? "ogg" : "webm";
+
+  function meld(tekst) { $("melding").textContent = tekst; $("melding").classList.remove("verborgen"); }
+
+  async function start() {
+    if (loopt) return;
+    try {
+      if (!stroom) stroom = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true, autoGainControl: true } });
+    } catch (e) { meld("De microfoon is niet beschikbaar. Geef deze pagina toestemming voor de microfoon en herlaad."); return; }
+    if (speler) speler.pause();
+    brokken = [];
+    recorder = soort ? new MediaRecorder(stroom, { mimeType: soort }) : new MediaRecorder(stroom);
+    const item = delen[deelNr].items[itemNr];
+    recorder.ondataavailable = (e) => { if (e.data.size) brokken.push(e.data); };
+    recorder.onstop = async () => {
+      const mime = recorder.mimeType || soort || "audio/webm";
+      const blob = new Blob(brokken, { type: mime });
+      await bewaar(item.sleutel, { blob, mime, t: Date.now() });
+      klaar.add(item.sleutel);
+      teken();
+      luister();
+    };
+    recorder.start();
+    loopt = true;
+    teken();
+  }
+  function stop() { if (!loopt) return; loopt = false; recorder.stop(); }
+  const wissel = () => (loopt ? stop() : start());
+
+  async function luister() {
+    const item = delen[deelNr].items[itemNr];
+    const op = await haal(item.sleutel);
+    if (!op) return;
+    if (speler) speler.pause();
+    speler = new Audio(URL.createObjectURL(op.blob));
+    speler.play().catch(() => {});
+  }
+
+  function ga(d, i) {
+    if (loopt) return;
+    if (speler) speler.pause();
+    deelNr = d;
+    itemNr = Math.max(0, Math.min(delen[d].items.length - 1, i));
+    teken();
+  }
+  function volgende() {
+    const items = delen[deelNr].items;
+    if (itemNr < items.length - 1) return ga(deelNr, itemNr + 1);
+    if (deelNr < delen.length - 1) return ga(deelNr + 1, 0);
+  }
+  const vorige = () => { if (itemNr > 0) ga(deelNr, itemNr - 1); };
+
+  // ---------- Scherm ----------
+  function teken() {
+    const deel = delen[deelNr], item = deel.items[itemNr];
+    $("delen").innerHTML = "";
+    delen.forEach((d, i) => {
+      const n = d.items.filter((x) => klaar.has(x.sleutel)).length;
+      const b = document.createElement("button");
+      b.className = "deel" + (i === deelNr ? " actief" : "") + (n === d.items.length ? " af" : "");
+      b.textContent = d.naam + " · " + n + "/" + d.items.length;
+      b.onclick = () => ga(i, eersteOpen(i));
+      $("delen").appendChild(b);
+    });
+    const heeft = klaar.has(item.sleutel);
+    $("teller").textContent = deel.naam + " · " + (itemNr + 1) + " van " + deel.items.length;
+    $("tekst").textContent = item.tekst;
+    $("tekst").className = "tekst" + (item.zin ? " zin" : "");
+    $("tip").textContent = loopt ? "Opname loopt…" : heeft ? "Opgenomen. Luister terug, of neem opnieuw op." : (item.zin ? "Zeg de zin warm en rustig, zoals je het tegen haar zou zeggen." : "");
+    $("opnemen").textContent = loopt ? "■ Stop" : heeft ? "● Opnieuw" : "● Opnemen";
+    $("opnemen").classList.toggle("loopt", loopt);
+    $("luister").disabled = !heeft || loopt;
+    $("vorige").disabled = loopt || itemNr === 0;
+    $("volgende").disabled = loopt;
+    $("lijst").innerHTML = "";
+    deel.items.forEach((x, i) => {
+      const c = document.createElement("button");
+      c.className = "chip" + (klaar.has(x.sleutel) ? " klaar" : "") + (i === itemNr ? " nu" : "");
+      c.textContent = x.zin ? x.tekst : x.tekst;
+      c.onclick = () => ga(deelNr, i);
+      $("lijst").appendChild(c);
+    });
+    const n = deel.items.filter((x) => klaar.has(x.sleutel)).length;
+    $("download").disabled = n === 0 || loopt;
+    $("downloadinfo").textContent = n + " van " + deel.items.length + " opgenomen in dit deel";
+  }
+  function eersteOpen(d) {
+    const i = delen[d].items.findIndex((x) => !klaar.has(x.sleutel));
+    return i < 0 ? 0 : i;
+  }
+
+  async function download() {
+    const deel = delen[deelNr], bestanden = [];
+    for (const item of deel.items) {
+      const op = await haal(item.sleutel);
+      if (!op) continue;
+      const map = item.sleutel.startsWith("z:") ? "zinnen/" : "woorden/";
+      bestanden.push({ naam: map + item.sleutel.slice(2) + "." + extensie(op.mime), data: new Uint8Array(await op.blob.arrayBuffer()) });
+    }
+    const zip = maakZip(bestanden);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(zip);
+    a.download = "balimba-opnames-" + deel.id + ".zip";
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  $("opnemen").onclick = wissel;
+  $("luister").onclick = luister;
+  $("volgende").onclick = volgende;
+  $("vorige").onclick = vorige;
+  $("download").onclick = download;
+  document.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "BUTTON" && (e.code === "Space" || e.code === "Enter")) e.preventDefault();
+    if (e.code === "Space") { e.preventDefault(); wissel(); }
+    else if (e.code === "Enter" || e.code === "ArrowRight") volgende();
+    else if (e.code === "ArrowLeft") vorige();
+    else if (e.code === "KeyL") luister();
+  });
+
+  (async () => {
+    if (!window.MediaRecorder || !navigator.mediaDevices) { meld("Deze browser kan niet opnemen. Gebruik Safari of Chrome."); }
+    try {
+      db = await openDb();
+      await laadInhoud();
+      klaar = new Set(await alleSleutels());
+      const d = delen.findIndex((x) => x.items.some((i) => !klaar.has(i.sleutel)));
+      deelNr = d < 0 ? 0 : d; itemNr = eersteOpen(deelNr);
+      teken();
+    } catch (e) { meld("De pagina kon niet starten: " + e.message); }
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 {
   "rondeGrootte": 10,
+  "computerstem": false,
   "stem": {
     "taal": "nl-NL",
     "tempoWoord": 0.7,
@@ -7,15 +8,14 @@
   },
   "zinnen": {
     "nogEens": [
-      "Probeer het nog eens.",
-      "Kijk nog eens goed.",
-      "Bijna! Nog een keer."
+      { "id": "nog-eens-1", "tekst": "Bijna! Kijk nog eens goed." },
+      { "id": "nog-eens-2", "tekst": "Rustig aan, probeer het nog een keer." },
+      { "id": "nog-eens-3", "tekst": "Je kunt het. Nog een keertje." }
     ],
-    "zegNa": "Zeg het maar na.",
     "rondeKlaar": [
-      "Goed gedaan! Tien sterren!",
-      "Wat lees jij goed!",
-      "Knap hoor! De ronde is klaar."
+      { "id": "ronde-klaar-1", "tekst": "Goed gedaan! Tien sterren!" },
+      { "id": "ronde-klaar-2", "tekst": "Wat lees jij goed!" },
+      { "id": "ronde-klaar-3", "tekst": "Knap hoor! De ronde is klaar." }
     ]
   }
 }

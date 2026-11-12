@@ -66,6 +66,7 @@ h1 { margin: 0; font-size: clamp(36px, 7vw, 60px); }
   box-shadow: 0 8px 0 var(--rand);
   display: flex; flex-direction: column; align-items: center; gap: 8px;
 }
+.vorm:disabled { opacity: .4; }
 .vorm:active { transform: translateY(6px); box-shadow: 0 2px 0 var(--rand); }
 .vorm .plaatje { font-size: clamp(64px, 12vw, 96px); line-height: 1.1; }
 .vorm .naam { font-size: 26px; font-weight: 700; }

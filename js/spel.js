@@ -1,4 +1,4 @@
-// Balimba leest – stap 2: één speelbare ronde in twee speelvormen.
+// Balimba leest – een ronde woorden lezen, samen of alleen.
 // De woorden staan in data/woorden.json, de instellingen in data/instellingen.json.
 
 (() => {
@@ -19,10 +19,49 @@
 
   let woorden = null;       // inhoud van woorden.json
   let inst = null;          // inhoud van instellingen.json
+  let opnames = { woorden: [], zinnen: [] };   // inhoud van opnames.json
   let plek = opslag.lees("balimba.plek", { level: 0, ronde: 0 });
   let st = null;            // toestand van de lopende ronde
 
   // ---------- Geluid ----------
+  // Voorzeggen gebeurt met eigen opnames uit audio/. Welke er zijn, staat in data/opnames.json.
+  // De computerstem is alleen een terugval en staat standaard uit (instellingen.json).
+
+  let audio = null;
+  function geluidAan() {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === "suspended") audio.resume();
+    } catch (e) { /* geen geluid */ }
+    return audio;
+  }
+
+  const buffers = new Map();   // pad -> Promise<AudioBuffer | null>
+  function haalOp(pad) {
+    if (!buffers.has(pad)) {
+      buffers.set(pad, fetch(pad)
+        .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+        .then((b) => new Promise((ok, fout) => geluidAan().decodeAudioData(b, ok, fout)))
+        .catch(() => null));
+    }
+    return buffers.get(pad);
+  }
+
+  let bron = null;
+  function stil() {
+    if (bron) { try { bron.stop(); } catch (e) { /* al gestopt */ } bron = null; }
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+  }
+  async function speel(pad) {
+    const buf = await haalOp(pad);
+    if (!buf || !geluidAan()) return false;
+    stil();
+    bron = audio.createBufferSource();
+    bron.buffer = buf;
+    bron.connect(audio.destination);
+    bron.start();
+    return true;
+  }
 
   let stem = null;
   function kiesStem() {
@@ -34,9 +73,8 @@
     kiesStem();
     speechSynthesis.addEventListener("voiceschanged", kiesStem);
   }
-
-  function zeg(tekst, tempo) {
-    if (!("speechSynthesis" in window)) return;
+  function computerstem(tekst, tempo) {
+    if (!inst.computerstem || !("speechSynthesis" in window)) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(tekst);
     u.lang = inst.stem.taal;
@@ -45,15 +83,25 @@
     speechSynthesis.speak(u);
   }
 
-  // Eén plek waar een woord wordt voorgezegd. Hier komen in stap 6 de eigen opnames.
-  function zegWoord(w) { zeg(w, inst.stem.tempoWoord); }
-  function zegZin(z) { zeg(z, inst.stem.tempoZin); }
+  const heeftWoord = (w) => opnames.woorden.includes(w);
+  const padWoord = (w) => "audio/woorden/" + w + ".mp3";
 
-  let audio = null;
+  function zegWoord(w) {
+    if (heeftWoord(w)) speel(padWoord(w)); else computerstem(w, inst.stem.tempoWoord);
+  }
+  // soort: "nogEens" of "rondeKlaar" uit instellingen.json
+  function zegZin(soort) {
+    const z = kies(inst.zinnen[soort]);
+    if (opnames.zinnen.includes(z.id)) speel("audio/zinnen/" + z.id + ".mp3"); else computerstem(z.tekst, inst.stem.tempoZin);
+  }
+  function laadVooraf(lijst) {
+    for (const w of lijst) if (heeftWoord(w)) haalOp(padWoord(w));
+    for (const soort of Object.keys(inst.zinnen)) for (const z of inst.zinnen[soort]) if (opnames.zinnen.includes(z.id)) haalOp("audio/zinnen/" + z.id + ".mp3");
+  }
+
   function toon(reeks) {
     try {
-      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-      if (audio.state === "suspended") audio.resume();
+      if (!geluidAan()) return;
       let t = audio.currentTime;
       for (const [hz, duur] of reeks) {
         const o = audio.createOscillator(), g = audio.createGain();
@@ -97,9 +145,18 @@
     return Math.ceil(woorden.levels[level].woorden.length / inst.rondeGrootte);
   }
 
+  function rondeWoorden() {
+    const n = inst.rondeGrootte;
+    return woorden.levels[plek.level].woorden.slice(plek.ronde * n, (plek.ronde + 1) * n);
+  }
+
   function vulStart() {
     const lvl = woorden.levels[plek.level];
     $("waar").textContent = "Level " + lvl.nummer + " · ronde " + (plek.ronde + 1) + " van " + aantalRondes(plek.level);
+    // Alleen spelen kan pas als elk woord van deze ronde een opname heeft (of de computerstem aan staat).
+    const kanAlleen = inst.computerstem || rondeWoorden().every(heeftWoord);
+    $("kiesAlleen").disabled = !kanAlleen;
+    $("alleenUitleg").classList.toggle("verborgen", kanAlleen);
   }
 
   function maakSterren(el, aantal, vol) {
@@ -115,8 +172,7 @@
   // ---------- De ronde ----------
 
   function startRonde(vorm) {
-    const n = inst.rondeGrootte;
-    const lijst = woorden.levels[plek.level].woorden.slice(plek.ronde * n, (plek.ronde + 1) * n);
+    const lijst = rondeWoorden();
     st = {
       vorm,
       rij: schud(lijst).map((w) => ({ w, terug: false, sterGehad: false })),
@@ -126,6 +182,8 @@
       bezig: false
     };
     document.body.dataset.vorm = vorm;
+    geluidAan();
+    laadVooraf(lijst);
     maakSterren($("sterren"), st.totaal, 0);
     toonScherm("spel");
     toonWoord();
@@ -263,7 +321,7 @@
     if (st.vorm === "samen") {
       st.pogingen++;
       if (st.pogingen === 1) {
-        zegZin(kies(inst.zinnen.nogEens));          // tweede poging
+        zegZin("nogEens");                      // tweede poging
       } else {
         st.geholpen = true;                          // voorzeggen, zij zegt het na
         zegWoord(item.w);
@@ -291,7 +349,7 @@
     maakSterren($("eindsterren"), st.totaal, st.sterren);
     toonScherm("klaar");
     fanfare();
-    setTimeout(() => zegZin(kies(inst.zinnen.rondeKlaar)), 900);
+    setTimeout(() => zegZin("rondeKlaar"), 900);
 
     // Volgende ronde klaarzetten; na de laatste ronde van een level door naar het volgende level.
     plek.ronde++;
@@ -303,7 +361,7 @@
   }
 
   function naarStart() {
-    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    stil();
     st = null;
     vulStart();
     toonScherm("start");
@@ -318,6 +376,8 @@
         fetch("data/instellingen.json").then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
       ]);
       woorden = w; inst = i;
+      // Ontbreekt de lijst met opnames, dan speelt het spel zonder stem.
+      opnames = await fetch("data/opnames.json").then((r) => (r.ok ? r.json() : opnames)).catch(() => opnames);
       if (!woorden.levels[plek.level] || plek.ronde >= aantalRondes(plek.level)) plek = { level: 0, ronde: 0 };
       vulStart();
     } catch (e) {
