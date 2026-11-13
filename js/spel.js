@@ -600,6 +600,15 @@
       if (!woorden.levels[plek.level] || plek.ronde >= aantalRondes(plek.level)) plek = { level: 0, ronde: 0 };
       neemOudeRondesMee();
       vulStart();
+      // Voorbeeld voor de ouder: index.html?toon=aap laat de dansende aap zien, zonder iets te bewaren.
+      if (new URLSearchParams(location.search).get("toon") === "aap") {
+        maakSterren($("eindsterren"), inst.rondeGrootte, inst.rondeGrootte);
+        $("gorilla").classList.remove("verborgen");
+        $("klaarDuo").classList.add("verborgen");
+        $("verder").classList.add("verborgen");
+        $("naarSticker").classList.add("verborgen");
+        toonScherm("klaar");
+      }
     } catch (e) {
       $("laadfout").classList.remove("verborgen");
       $("speel").disabled = true;
