@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balimba leest – voor ouders</title>
+<style>
+  :root { --inkt:#2b1b4a; --zacht:#6c5c8c; --kaart:#fff; --rand:#e3d6f7; --paars:#8a4fff; --licht:#efe6ff; --bg:#f6f0ff; --groen:#1f9d6b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--inkt); font-family: system-ui, -apple-system, sans-serif; line-height:1.45; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 20px 16px 60px; }
+  header { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 8px; }
+  h1 { font-size: 24px; margin: 0; }
+  h2 { font-size: 18px; margin: 28px 0 4px; }
+  p.uitleg { margin: 0 0 10px; color: var(--zacht); font-size: 15px; }
+  a.knop, button.knop { font: inherit; font-size: 15px; padding: 9px 14px; border-radius: 12px; border: 2px solid var(--rand); background: var(--kaart); color: var(--inkt); cursor: pointer; text-decoration: none; }
+  .kaart { background: var(--kaart); border: 2px solid var(--rand); border-radius: 18px; padding: 14px 16px; overflow-x: auto; }
+  .tabs { display:flex; gap:8px; flex-wrap:wrap; margin: 10px 0; }
+  .tab { font: inherit; padding: 7px 14px; border-radius: 999px; border: 2px solid var(--rand); background: var(--kaart); color: var(--inkt); cursor: pointer; }
+  .tab.actief { background: var(--paars); border-color: var(--paars); color: #fff; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rand); white-space: nowrap; }
+  th { color: var(--zacht); font-weight: 500; font-size: 13px; }
+  td.getal, th.getal { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  .balk { display: inline-block; height: 12px; border-radius: 6px; background: var(--paars); vertical-align: middle; min-width: 2px; }
+  .balkvak { width: 38%; }
+  .leeg { color: var(--zacht); padding: 8px 2px; }
+  .demo { background: #fff3e6; border: 2px solid #f29a2e; border-radius: 12px; padding: 10px 14px; margin: 10px 0; }
+  .groot { font-size: 30px; font-weight: 700; }
+  .kop { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .kop .kaart .label { color: var(--zacht); font-size: 13px; }
+  .omlaag { color: var(--groen); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Balimba leest · voor ouders</h1>
+    <span>
+      <button class="knop" id="export">Gegevens bewaren</button>
+      <a class="knop" href="index.html">Terug naar het spel</a>
+    </span>
+  </header>
+  <p class="uitleg">
+    Leestijd is de tijd tussen het verschijnen van een woord en de tik op het oortje. Per doorgang van een level
+    zie je de middelste leestijd (de mediaan), zodat een pauze bij een enkel woord niet meetelt.
+    Vergelijk alleen binnen hetzelfde level. Alles staat alleen op dit apparaat.
+  </p>
+  <div class="demo" id="demo" hidden>Dit zijn verzonnen voorbeeldgegevens om te laten zien hoe het dashboard eruitziet.</div>
+
+  <div class="kop" id="kop"></div>
+
+  <h2>Leestijd per doorgang</h2>
+  <p class="uitleg">Dezelfde lijst, elke keer opnieuw gelezen. Je verwacht dat de leestijd daalt.</p>
+  <div class="tabs" id="tabs"></div>
+  <div class="kaart" id="doorgangen"></div>
+
+  <h2>Eerste doorgang per level</h2>
+  <p class="uitleg">De eerste keer dat ze een level leest, kent ze de woorden nog niet. Blijft die leestijd gelijk terwijl de levels moeilijker worden, dan gaat haar lezen zelf vooruit.</p>
+  <div class="kaart" id="eerste"></div>
+
+  <h2>Lastige woorden in dit level</h2>
+  <p class="uitleg">De woorden waar ze het langst over doet of het vaakst "nog een keer" bij tikt. Handig om samen te oefenen.</p>
+  <div class="kaart" id="lastig"></div>
+
+  <h2>Oefenritme, laatste 14 dagen</h2>
+  <div class="kaart" id="ritme"></div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const lees = (sleutel, anders) => { try { const v = localStorage.getItem(sleutel); return v == null ? anders : JSON.parse(v); } catch (e) { return anders; } };
+  const demo = new URLSearchParams(location.search).has("demo");
+
+  // Verzonnen gegevens voor het voorbeeld (?demo). Er wordt niets bewaard.
+  function maakDemo() {
+    const woorden = { 3: ["plaats","blijkt","speelt","zwart","slaapt","trots","klopt","stopt","plant","sport","dwars","plots","storm","stuurt","kruipt","kwart","klimt","klant","blaast","zwemt"],
+                      4: ["spriet","winst","ziekst","plaatst","struik","smalst","zwakst","duurst","blootst","koelst","streelt","straal","worst","domst","trotst","streel","straalt","dwarst","spleet","holst"] };
+    const uit = []; let dag = Date.now() - 9 * 864e5;
+    const reeks = [[3,1,5200],[3,2,4300],[3,3,3700],[3,4,3300],[3,5,3000],[4,1,5000],[4,2,4100]];
+    for (const [level, doorgang, basis] of reeks) {
+      woorden[level].forEach((w, i) => {
+        const zwaar = /kst|lst|tst/.test(w) ? 1.5 : 1;
+        const ms = Math.round(basis * zwaar * (0.7 + Math.random() * 0.7) + (Math.random() < 0.06 ? 9000 : 0));
+        const fout = Math.random() < 0.18 * zwaar / doorgang;
+        uit.push({ w, level, ronde: Math.floor(i / 10) + 1, doorgang, msLees: ms, oor: true, terug: false, uitkomst: fout ? "nog een keer" : "goed", t: dag + i * 20000 });
+      });
+      dag += 1.3 * 864e5;
+    }
+    return uit;
+  }
+
+  const alle = demo ? maakDemo() : lees("balimba.metingen", []);
+  $("demo").hidden = !demo;
+  // Alleen de eerste keer dat een woord in een ronde verschijnt, en alleen metingen met een leestijd.
+  const metingen = alle.filter((m) => m.msLees != null && !m.terug);
+
+  const mediaan = (lijst) => { const a = lijst.slice().sort((x, y) => x - y); const n = a.length; return n ? (n % 2 ? a[(n - 1) / 2] : (a[n / 2 - 1] + a[n / 2]) / 2) : null; };
+  const sec = (ms) => (ms / 1000).toFixed(1).replace(".", ",") + " s";
+  const perMin = (ms) => Math.round(60000 / ms);
+  const datum = (t) => new Date(t).toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
+  const groepeer = (lijst, sleutel) => { const g = new Map(); for (const x of lijst) { const k = sleutel(x); if (!g.has(k)) g.set(k, []); g.get(k).push(x); } return g; };
+
+  function doorgangenVan(level) {
+    const g = groepeer(metingen.filter((m) => m.level === level), (m) => m.doorgang || 1);
+    return [...g.keys()].sort((a, b) => a - b).map((nr) => {
+      const rij = g.get(nr);
+      return { nr, n: rij.length, med: mediaan(rij.map((m) => m.msLees)), goed: rij.filter((m) => m.uitkomst === "goed").length / rij.length,
+               van: Math.min(...rij.map((m) => m.t)), tot: Math.max(...rij.map((m) => m.t)) };
+    }).filter((d) => d.n >= 5);
+  }
+
+  const levels = [...new Set(metingen.map((m) => m.level))].sort((a, b) => a - b);
+  let gekozen = levels.length ? levels[levels.length - 1] : null;
+
+  function tabel(koppen, rijen) {
+    return "<table><tr>" + koppen.map((k) => "<th" + (k.getal ? " class='getal'" : "") + ">" + k.t + "</th>").join("") + "</tr>" +
+      rijen.map((r) => "<tr>" + r.map((c, i) => "<td" + (koppen[i].getal ? " class='getal'" : koppen[i].balk ? " class='balkvak'" : "") + ">" + c + "</td>").join("") + "</tr>").join("") + "</table>";
+  }
+  const balk = (waarde, max) => "<span class='balk' style='width:" + Math.max(2, Math.round((waarde / max) * 100)) + "%'></span>";
+  const leeg = (tekst) => "<div class='leeg'>" + tekst + "</div>";
+
+  function teken() {
+    if (!metingen.length) {
+      const oud = alle.length ? " Er staan wel " + alle.length + " oudere metingen, maar die zijn gemeten tot het duimpje en bevatten het luisteren; ze tellen daarom niet mee." : "";
+      for (const id of ["doorgangen", "eerste", "lastig", "ritme"]) $(id).innerHTML = leeg("Nog geen leestijden." + (id === "doorgangen" ? oud + " Na de eerstvolgende ronde verschijnen hier cijfers." : ""));
+      $("kop").innerHTML = "";
+      return;
+    }
+
+    // Tabs per level
+    $("tabs").innerHTML = "";
+    for (const l of levels) {
+      const b = document.createElement("button");
+      b.className = "tab" + (l === gekozen ? " actief" : "");
+      b.textContent = "Level " + l;
+      b.onclick = () => { gekozen = l; teken(); };
+      $("tabs").appendChild(b);
+    }
+
+    // Leestijd per doorgang
+    const dg = doorgangenVan(gekozen);
+    if (!dg.length) { $("doorgangen").innerHTML = leeg("Nog te weinig woorden gelezen in dit level."); }
+    else {
+      const max = Math.max(...dg.map((d) => d.med));
+      $("doorgangen").innerHTML = tabel(
+        [{ t: "Doorgang" }, { t: "Wanneer" }, { t: "Leestijd per woord", getal: true }, { t: "", balk: true }, { t: "Woorden per minuut", getal: true }, { t: "In één keer goed", getal: true }, { t: "Woorden", getal: true }],
+        dg.map((d) => [d.nr + "e keer", datum(d.van) + (datum(d.tot) !== datum(d.van) ? " – " + datum(d.tot) : ""), sec(d.med), balk(d.med, max), perMin(d.med), Math.round(d.goed * 100) + "%", d.n]));
+    }
+
+    // Kopcijfers voor het gekozen level
+    const eerste = dg[0], laatste = dg[dg.length - 1];
+    let kop = "";
+    if (laatste) kop += "<div class='kaart'><div class='label'>Level " + gekozen + ", laatste doorgang</div><div class='groot'>" + sec(laatste.med) + "</div><div class='label'>per woord · " + perMin(laatste.med) + " woorden per minuut</div></div>";
+    if (dg.length > 1) {
+      const verschil = Math.round((1 - laatste.med / eerste.med) * 100);
+      kop += "<div class='kaart'><div class='label'>Sinds de eerste doorgang</div><div class='groot " + (verschil > 0 ? "omlaag" : "") + "'>" + (verschil > 0 ? verschil + "% sneller" : verschil < 0 ? -verschil + "% langzamer" : "gelijk") + "</div><div class='label'>" + sec(eerste.med) + " → " + sec(laatste.med) + "</div></div>";
+    }
+    const week = metingen.filter((m) => m.t > Date.now() - 7 * 864e5).length;
+    kop += "<div class='kaart'><div class='label'>Laatste 7 dagen</div><div class='groot'>" + week + "</div><div class='label'>woorden gelezen</div></div>";
+    $("kop").innerHTML = kop;
+
+    // Eerste doorgang per level
+    const eersten = levels.map((l) => ({ l, d: doorgangenVan(l).find((d) => d.nr === 1) })).filter((x) => x.d);
+    if (!eersten.length) $("eerste").innerHTML = leeg("Nog geen level waarvan de eerste doorgang is gemeten. Level 3 was al gestart voordat de meting begon.");
+    else {
+      const max = Math.max(...eersten.map((x) => x.d.med));
+      $("eerste").innerHTML = tabel([{ t: "Level" }, { t: "Wanneer" }, { t: "Leestijd per woord", getal: true }, { t: "", balk: true }, { t: "In één keer goed", getal: true }],
+        eersten.map((x) => ["Level " + x.l, datum(x.d.van), sec(x.d.med), balk(x.d.med, max), Math.round(x.d.goed * 100) + "%"]));
+    }
+
+    // Lastige woorden
+    const perWoord = [...groepeer(metingen.filter((m) => m.level === gekozen), (m) => m.w)].map(([w, rij]) => ({
+      w, n: rij.length, med: mediaan(rij.map((m) => m.msLees)), fout: rij.filter((m) => m.uitkomst !== "goed").length,
+      laatst: rij.slice().sort((a, b) => b.t - a.t)[0].msLees }));
+    const lastig = perWoord.sort((a, b) => (b.fout - a.fout) || (b.med - a.med)).slice(0, 10);
+    $("lastig").innerHTML = lastig.length ? tabel([{ t: "Woord" }, { t: "Keer \"nog een keer\"", getal: true }, { t: "Leestijd (mediaan)", getal: true }, { t: "Laatste keer", getal: true }, { t: "Keer gelezen", getal: true }],
+      lastig.map((x) => ["<b>" + x.w + "</b>", x.fout, sec(x.med), sec(x.laatst), x.n])) : leeg("Nog geen woorden.");
+
+    // Oefenritme
+    const dagen = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+      const van = d.getTime(), tot = van + 864e5;
+      const rij = metingen.filter((m) => m.t >= van && m.t < tot);
+      dagen.push({ d, n: rij.length, levels: [...new Set(rij.map((m) => m.level))].sort().join(", ") });
+    }
+    const maxN = Math.max(1, ...dagen.map((x) => x.n));
+    $("ritme").innerHTML = tabel([{ t: "Dag" }, { t: "Woorden", getal: true }, { t: "", balk: true }, { t: "Rondes (ongeveer)", getal: true }, { t: "Level" }],
+      dagen.map((x) => [x.d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" }), x.n || "–", x.n ? balk(x.n, maxN) : "", x.n ? Math.round(x.n / 10) : "–", x.levels || ""]));
+  }
+
+  // Alles wat het spel op dit apparaat bewaart, als één bestand.
+  $("export").onclick = () => {
+    const uit = {};
+    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith("balimba.")) uit[k] = JSON.parse(localStorage.getItem(k)); } } catch (e) { /* niets te bewaren */ }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(uit, null, 1)], { type: "application/json" }));
+    a.download = "balimba-gegevens-" + new Date().toISOString().slice(0, 10) + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+
+  teken();
+})();
+</script>
+</body>
+</html>

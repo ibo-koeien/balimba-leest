@@ -292,6 +292,7 @@
     st.gehoord = !kanHoren(item.w);
     st.bezig = false;
     st.t0 = performance.now();
+    st.tOor = null;
 
     const el = $("woord");
     el.textContent = item.w;
@@ -311,13 +312,23 @@
     opnieuw.classList.toggle("onzichtbaar", !st.gehoord || item.terug);
   }
 
+  // De hoeveelste keer dat ze dit level doorloopt (1 = de eerste keer).
+  function doorgangNr(level) {
+    const n = haal("doorgangNr")[level];
+    return (n == null ? geplakt(level).length + tegoed(level) : n) + 1;
+  }
+
   function schrijfMeting(item, uitkomst) {
     const log = opslag.lees("balimba.metingen", []);
     log.push({
       w: item.w,
       level: woorden.levels[plek.level].nummer,
       ronde: plek.ronde + 1,
-      vorm: "alleen",
+      // Leestijd: van het verschijnen van het woord tot de eerste tik op het oortje.
+      // Zonder opname is er geen oortje; dan telt de tijd tot ze zelf beoordeelt.
+      msLees: Math.round((st.tOor || performance.now()) - st.t0),
+      oor: kanHoren(item.w),
+      doorgang: doorgangNr(plek.level),
       ms: Math.round(performance.now() - st.t0),
       terug: item.terug,
       uitkomst,
@@ -407,6 +418,7 @@
 
   function opOor() {
     if (!st || st.bezig) return;
+    if (st.tOor == null) st.tOor = performance.now();
     zegWoord(nu().w);
     st.gehoord = true;
     zetKnoppen();
@@ -425,6 +437,7 @@
     let verdiend = false;
     if (gedaan.size >= n) {
       // Alle rondes gespeeld: het level is één keer rond. Dat levert een sticker op, tot de rij vol is.
+      const nr = haal("doorgangNr"); nr[l] = doorgangNr(l); zet("doorgangNr", nr);
       d[l] = [];
       if (geplakt(l).length + tegoed(l) < stickers.perLevel) {
         const t = haal("tegoed"); t[l] = (t[l] || 0) + 1; zet("tegoed", t);
@@ -746,6 +759,15 @@
       $("laadfout").classList.remove("verborgen");
       $("speel").disabled = true;
     }
+  }
+
+  // Voor de ouder: de titel anderhalve seconde ingedrukt houden opent het dashboard.
+  {
+    let timer = null;
+    const titel = document.querySelector("#start h1");
+    const stop = () => clearTimeout(timer);
+    titel.addEventListener("pointerdown", () => { timer = setTimeout(() => { location.href = "ouders.html"; }, 1500); });
+    for (const soort of ["pointerup", "pointerleave", "pointercancel"]) titel.addEventListener(soort, stop);
   }
 
   $("speel").addEventListener("click", startRonde);
