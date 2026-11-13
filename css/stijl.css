@@ -280,3 +280,18 @@ body[data-vorm="alleen"] .goed .duim { display: inline; }
 .kroontje { width: 44px; font-size: 36px; text-align: center; visibility: hidden; }
 .bordrij.vol .kroontje { visibility: visible; }
 @media (prefers-reduced-motion: reduce) { .vakje, .strook { animation: none !important; } }
+
+/* ---------- De Grote Aap: danst als een heel level rond is ---------- */
+.gorilla { width: clamp(200px, 34vw, 320px); height: auto; overflow: visible; }
+.gorilla .g-lijf { transform-origin: 120px 240px; animation: aap-lijf .8s ease-in-out infinite; }
+.gorilla .g-arm.g-links { transform-origin: 74px 116px; animation: aap-arm-l .8s ease-in-out infinite; }
+.gorilla .g-arm.g-rechts { transform-origin: 166px 116px; animation: aap-arm-r .8s ease-in-out infinite; }
+.gorilla .g-been.g-links { animation: aap-been .8s ease-in-out infinite; }
+.gorilla .g-been.g-rechts { animation: aap-been .8s ease-in-out -.4s infinite; }
+.gorilla .g-vonk { transform-origin: 120px 110px; animation: aap-vonk 1.6s ease-in-out infinite; }
+@keyframes aap-lijf { 0%,100% { transform: translateY(0) rotate(-5deg); } 25% { transform: translateY(-12px) rotate(0); } 50% { transform: translateY(0) rotate(5deg); } 75% { transform: translateY(-12px) rotate(0); } }
+@keyframes aap-arm-l { 0%,100% { transform: rotate(-22deg); } 50% { transform: rotate(26deg); } }
+@keyframes aap-arm-r { 0%,100% { transform: rotate(-26deg); } 50% { transform: rotate(22deg); } }
+@keyframes aap-been { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@keyframes aap-vonk { 0%,100% { transform: scale(.9); opacity: .5; } 50% { transform: scale(1.08); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .gorilla * { animation: none !important; } }

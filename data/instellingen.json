@@ -8,14 +8,42 @@
   },
   "zinnen": {
     "nogEens": [
-      { "id": "nog-eens-1", "tekst": "Bijna! Kijk nog eens goed." },
-      { "id": "nog-eens-2", "tekst": "Rustig aan, probeer het nog een keer." },
-      { "id": "nog-eens-3", "tekst": "Je kunt het. Nog een keertje." }
+      {
+        "id": "nog-eens-1",
+        "tekst": "Bijna! Kijk nog eens goed."
+      },
+      {
+        "id": "nog-eens-2",
+        "tekst": "Rustig aan, probeer het nog een keer."
+      },
+      {
+        "id": "nog-eens-3",
+        "tekst": "Je kunt het. Nog een keertje."
+      }
     ],
     "rondeKlaar": [
-      { "id": "ronde-klaar-1", "tekst": "Goed gedaan! Tien sterren!" },
-      { "id": "ronde-klaar-2", "tekst": "Wat lees jij goed!" },
-      { "id": "ronde-klaar-3", "tekst": "Knap hoor! De ronde is klaar." }
+      {
+        "id": "ronde-klaar-1",
+        "tekst": "Goed gedaan! Tien sterren!"
+      },
+      {
+        "id": "ronde-klaar-2",
+        "tekst": "Wat lees jij goed!"
+      },
+      {
+        "id": "ronde-klaar-3",
+        "tekst": "Knap hoor! De ronde is klaar."
+      }
+    ],
+    "levelKlaar": [
+      {
+        "id": "level-klaar-1",
+        "tekst": "Wauw, het hele level! De Grote Aap is trots op jou!"
+      },
+      {
+        "id": "level-klaar-2",
+        "tekst": "Je hebt een sticker verdiend. Wat knap van jou!"
+      }
     ]
   }
 }

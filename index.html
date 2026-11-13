@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/stijl.css?v=202611121804">
+<link rel="stylesheet" href="css/stijl.css?v=202611131247">
 </head>
 <body data-vorm="alleen">
 
@@ -120,7 +120,36 @@
 
 <!-- Ronde klaar -->
 <section id="klaar" class="scherm verborgen">
-  <div class="duo dans" aria-hidden="true"><svg class="dier"><use href="#t-eenhoorn"/></svg><svg class="dier"><use href="#t-kat"/></svg></div>
+  <!-- De Grote Aap danst als een heel level rond is -->
+  <svg class="gorilla verborgen" id="gorilla" viewBox="0 0 240 250" aria-hidden="true">
+    <g class="g-vonk" fill="#ffd24a">
+      <path d="M22 30 l3 9 9 3 -9 3 -3 9 -3 -9 -9 -3 9 -3z"/><path d="M214 22 l3 9 9 3 -9 3 -3 9 -3 -9 -9 -3 9 -3z" fill="#ff8fc7"/>
+      <path d="M206 150 l2 7 7 2 -7 2 -2 7 -2 -7 -7 -2 7 -2z" fill="#c3a6ff"/><path d="M30 160 l2 7 7 2 -7 2 -2 7 -2 -7 -7 -2 7 -2z" fill="#8fc7ff"/>
+    </g>
+    <g class="g-lijf">
+      <g class="g-been g-links"><rect x="76" y="184" width="36" height="46" rx="16" fill="#55506b"/><ellipse cx="88" cy="232" rx="25" ry="11" fill="#cdbba9" stroke="#3d3852" stroke-width="2.5"/></g>
+      <g class="g-been g-rechts"><rect x="128" y="184" width="36" height="46" rx="16" fill="#55506b"/><ellipse cx="152" cy="232" rx="25" ry="11" fill="#cdbba9" stroke="#3d3852" stroke-width="2.5"/></g>
+      <g class="g-arm g-links"><path d="M74 116 L36 62" stroke="#55506b" stroke-width="32" stroke-linecap="round"/><circle cx="34" cy="58" r="18" fill="#cdbba9" stroke="#3d3852" stroke-width="2.5"/></g>
+      <g class="g-arm g-rechts"><path d="M166 116 L204 62" stroke="#55506b" stroke-width="32" stroke-linecap="round"/><circle cx="206" cy="58" r="18" fill="#cdbba9" stroke="#3d3852" stroke-width="2.5"/></g>
+      <ellipse cx="120" cy="152" rx="62" ry="60" fill="#55506b" stroke="#3d3852" stroke-width="3"/>
+      <ellipse cx="120" cy="160" rx="38" ry="38" fill="#7d7696"/>
+      <circle cx="69" cy="74" r="12" fill="#55506b" stroke="#3d3852" stroke-width="2.5"/><circle cx="69" cy="74" r="6" fill="#cdbba9"/>
+      <circle cx="171" cy="74" r="12" fill="#55506b" stroke="#3d3852" stroke-width="2.5"/><circle cx="171" cy="74" r="6" fill="#cdbba9"/>
+      <ellipse cx="120" cy="34" rx="26" ry="16" fill="#55506b" stroke="#3d3852" stroke-width="3"/>
+      <ellipse cx="120" cy="74" rx="50" ry="45" fill="#55506b" stroke="#3d3852" stroke-width="3"/>
+      <ellipse cx="120" cy="40" rx="24" ry="13" fill="#55506b"/>
+      <path d="M84 70 Q84 52 104 54 Q120 56 120 62 Q120 56 136 54 Q156 52 156 70 Q160 108 120 110 Q80 108 84 70Z" fill="#cdbba9"/>
+      <path d="M86 60 Q120 46 154 60" fill="none" stroke="#3d3852" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="104" cy="72" r="6.5" fill="#2b1b4a"/><circle cx="106.3" cy="69.7" r="2.3" fill="#fff"/>
+      <circle cx="136" cy="72" r="6.5" fill="#2b1b4a"/><circle cx="138.3" cy="69.7" r="2.3" fill="#fff"/>
+      <ellipse cx="120" cy="93" rx="25" ry="16" fill="#e2d3c3"/>
+      <circle cx="113" cy="86" r="2.6" fill="#3d3852"/><circle cx="127" cy="86" r="2.6" fill="#3d3852"/>
+      <path d="M104 93 Q120 112 136 93Z" fill="#7a2e4a" stroke="#3d3852" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M112 101 Q120 108 128 101 Q120 97 112 101Z" fill="#ff8fab"/>
+      <circle cx="92" cy="88" r="6" fill="#ff9dbd" opacity=".6"/><circle cx="148" cy="88" r="6" fill="#ff9dbd" opacity=".6"/>
+    </g>
+  </svg>
+  <div class="duo dans" id="klaarDuo" aria-hidden="true"><svg class="dier"><use href="#t-eenhoorn"/></svg><svg class="dier"><use href="#t-kat"/></svg></div>
   <div class="sterren eind" id="eindsterren" aria-hidden="true"></div>
   <div class="keuze">
     <button class="rond goed" id="verder" aria-label="Volgende ronde">
@@ -147,7 +176,7 @@
   <div class="bordrijen" id="bordrijen"></div>
 </section>
 
-<script>window.BALIMBA_VERSIE = "202611121804";</script>
-<script src="js/spel.js?v=202611121804"></script>
+<script>window.BALIMBA_VERSIE = "202611131247";</script>
+<script src="js/spel.js?v=202611131247"></script>
 </body>
 </html>

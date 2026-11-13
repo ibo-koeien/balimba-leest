@@ -92,7 +92,11 @@
   }
   // soort: "nogEens" of "rondeKlaar" uit instellingen.json
   function zegZin(soort) {
-    const z = kies(inst.zinnen[soort]);
+    // Kies bij voorkeur een zin die al is ingesproken.
+    const alle = inst.zinnen[soort] || [];
+    const metOpname = alle.filter((x) => opnames.zinnen.includes(x.id));
+    const z = kies(metOpname.length ? metOpname : alle);
+    if (!z) return Promise.resolve(0);
     if (opnames.zinnen.includes(z.id)) return speel("audio/zinnen/" + z.id + ".mp3");   // geeft de duur in seconden
     computerstem(z.tekst, inst.stem.tempoZin);
     return Promise.resolve(0);
@@ -411,7 +415,6 @@
     maakSterren($("eindsterren"), st.totaal, st.sterren);
     toonScherm("klaar");
     fanfare();
-    setTimeout(() => zegZin("rondeKlaar"), 900);
 
     // Deze ronde telt mee voor de lopende doorgang van het level.
     const l = plek.level, n = aantalRondes(l);
@@ -439,6 +442,12 @@
     bewaarPlek();
     $("verder").classList.toggle("verborgen", verdiend);
     $("naarSticker").classList.toggle("verborgen", !verdiend);
+    // Heel level rond: De Grote Aap danst. Anders dansen de eenhoorn en het katje.
+    $("gorilla").classList.toggle("verborgen", !verdiend);
+    $("klaarDuo").classList.toggle("verborgen", verdiend);
+    const trots = verdiend && (inst.zinnen.levelKlaar || []).some((x) => opnames.zinnen.includes(x.id));
+    if (verdiend) setTimeout(fanfare, 700);
+    setTimeout(() => zegZin(trots ? "levelKlaar" : "rondeKlaar"), verdiend ? 1500 : 900);
   }
 
   // ---------- Sticker kiezen en plakken ----------
