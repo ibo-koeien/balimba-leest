@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/stijl.css?v=202611131300">
+<link rel="stylesheet" href="css/stijl.css?v=202611131313">
 </head>
 <body data-vorm="alleen">
 
@@ -63,6 +63,26 @@
     <rect x="95" y="116" width="34" height="32" rx="15" fill="#f6d9d6" stroke="#b79aa8" stroke-width="3"/>
     <path d="M34 126 h28 M33 134 h30 M98 126 h28 M97 134 h30" stroke="#8f84a6" stroke-width="3.4" stroke-linecap="round"/>
     <path d="M42 141 v5 M54 141 v5 M106 141 v5 M118 141 v5" stroke="#b79aa8" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="t-aap" viewBox="0 0 160 150">
+    <path d="M14 150 Q14 112 50 108 H110 Q146 112 146 150Z" fill="#3f3a4f" stroke="#2a2638" stroke-width="3" stroke-linejoin="round"/>
+    <g transform="translate(-34,2) scale(.95)">
+      <circle cx="74" cy="80" r="13" fill="#d8c3ad" stroke="#2a2638" stroke-width="2.5"/><path d="M70 76 q6 4 0 9" fill="none" stroke="#b49c84" stroke-width="2"/>
+      <circle cx="166" cy="80" r="13" fill="#d8c3ad" stroke="#2a2638" stroke-width="2.5"/><path d="M170 76 q-6 4 0 9" fill="none" stroke="#b49c84" stroke-width="2"/>
+      <ellipse cx="120" cy="74" rx="45" ry="50" fill="#d8c3ad" stroke="#2a2638" stroke-width="3"/>
+      <path d="M76 66 Q74 26 114 24 L122 6 L128 22 L146 2 L146 22 L168 10 L158 30 Q168 46 164 66 Q146 42 116 46 Q90 48 76 66Z" fill="#3f3a4f" stroke="#2a2638" stroke-width="3" stroke-linejoin="round"/>
+      <ellipse cx="120" cy="98" rx="31" ry="21" fill="#ead9c6"/>
+      <circle cx="104" cy="72" r="5.6" fill="#2b1b4a"/><circle cx="106" cy="70" r="2" fill="#fff"/>
+      <circle cx="136" cy="72" r="5.6" fill="#2b1b4a"/><circle cx="138" cy="70" r="2" fill="#fff"/>
+      <path d="M95 62 q9 -5 17 0 M128 62 q8 -5 17 0" fill="none" stroke="#2a2638" stroke-width="3" stroke-linecap="round"/>
+      <path d="M114 86 q6 -5 12 0 l-6 6z" fill="#2a2638"/>
+      <path d="M102 100 Q120 118 138 100Z" fill="#7a2e4a" stroke="#2a2638" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M111 108 Q120 115 129 108 Q120 104 111 108Z" fill="#ff8fab"/>
+      <circle cx="90" cy="92" r="6" fill="#ff9dbd" opacity=".55"/><circle cx="150" cy="92" r="6" fill="#ff9dbd" opacity=".55"/>
+    </g>
+    <rect x="27" y="114" width="38" height="34" rx="16" fill="#d8c3ad" stroke="#2a2638" stroke-width="3"/>
+    <rect x="95" y="114" width="38" height="34" rx="16" fill="#d8c3ad" stroke="#2a2638" stroke-width="3"/>
+    <path d="M38 136 v9 M46 136 v9 M54 136 v9 M106 136 v9 M114 136 v9 M122 136 v9" stroke="#2a2638" stroke-width="2.2" stroke-linecap="round"/>
   </symbol>
   <symbol id="t-huis" viewBox="0 0 140 120">
     <rect x="38" y="58" width="64" height="56" rx="6" fill="#fff6e6" stroke="#e0c8a0" stroke-width="3"/>
@@ -149,7 +169,7 @@
 
 <!-- Beginscherm -->
 <section id="start" class="scherm">
-  <div class="duo" aria-hidden="true"><svg class="dier"><use href="#t-eenhoorn"/></svg><svg class="dier"><use href="#t-kat"/></svg></div>
+  <div class="duo" aria-hidden="true"><svg class="dier"><use href="#t-aap"/></svg><svg class="dier"><use href="#t-kat"/></svg></div>
   <h1>Balimba leest</h1>
   <div class="kiesrij"><span class="label">Level</span><div class="kiezer" id="levels"></div></div>
   <div class="kiesrij"><span class="label">Ronde</span><div class="kiezer" id="rondes"></div></div>
@@ -172,7 +192,7 @@
 
   <div class="midden">
     <div class="bord">
-      <svg class="dier houdt links" aria-hidden="true"><use href="#t-eenhoorn"/></svg>
+      <svg class="dier houdt links" aria-hidden="true"><use href="#t-aap"/></svg>
       <svg class="dier houdt rechts" aria-hidden="true"><use href="#t-kat"/></svg>
       <div class="woord" id="woord"></div>
     </div>
@@ -221,7 +241,7 @@
       <circle cx="90" cy="92" r="6" fill="#ff9dbd" opacity=".55"/><circle cx="150" cy="92" r="6" fill="#ff9dbd" opacity=".55"/>
     </g>
   </svg>
-  <div class="duo dans" id="klaarDuo" aria-hidden="true"><svg class="dier"><use href="#t-eenhoorn"/></svg><svg class="dier"><use href="#t-kat"/></svg></div>
+  <div class="duo dans" id="klaarDuo" aria-hidden="true"><svg class="dier"><use href="#t-aap"/></svg><svg class="dier"><use href="#t-kat"/></svg></div>
   <div class="sterren eind" id="eindsterren" aria-hidden="true"></div>
   <div class="keuze">
     <button class="rond goed" id="verder" aria-label="Volgende ronde">
@@ -251,7 +271,7 @@
   <button class="rond stil" id="finaleHuis" aria-label="Terug naar het begin"><span>⌂</span></button>
 </section>
 
-<script>window.BALIMBA_VERSIE = "202611131300";</script>
-<script src="js/spel.js?v=202611131300"></script>
+<script>window.BALIMBA_VERSIE = "202611131313";</script>
+<script src="js/spel.js?v=202611131313"></script>
 </body>
 </html>

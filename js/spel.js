@@ -149,7 +149,7 @@
     el.classList.add(klas);
   }
 
-  // De eenhoorn en het katje die het bord vasthouden, reageren samen.
+  // De Grote Aap en het katje die het bord vasthouden, reageren samen.
   function dieren(klas) {
     document.querySelectorAll("#spel .dier").forEach((d) => {
       d.classList.remove("blij", "moedig");
@@ -443,7 +443,7 @@
     bewaarPlek();
     $("verder").classList.toggle("verborgen", verdiend);
     $("naarSticker").classList.toggle("verborgen", !verdiend);
-    // Heel level rond: De Grote Aap danst. Anders dansen de eenhoorn en het katje.
+    // Heel level rond: De Grote Aap danst. Anders dansen de aap en het katje klein.
     $("gorilla").classList.toggle("verborgen", !verdiend);
     $("klaarDuo").classList.toggle("verborgen", verdiend);
     const trots = verdiend && (inst.zinnen.levelKlaar || []).some((x) => opnames.zinnen.includes(x.id));
@@ -664,7 +664,7 @@
     const dier = (id) => { const d = svgEl("svg", { class: "dier", viewBox: "0 0 160 150" }); d.appendChild(svgEl("use", { href: "#" + id })); return d; };
     const aap = $("gorilla").cloneNode(true);
     aap.removeAttribute("id"); aap.classList.remove("verborgen");
-    feest.append(dier("t-eenhoorn"), aap, dier("t-kat"));
+    feest.append(aap, dier("t-kat"));
 
     const conf = $("confetti");
     conf.innerHTML = "";
