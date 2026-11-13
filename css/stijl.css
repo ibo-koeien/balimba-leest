@@ -282,6 +282,18 @@ body[data-vorm="alleen"] .goed .duim { display: inline; }
   border-width: 3px; background: rgba(255, 255, 255, .9);
 }
 .tocht .vakje.steen.vol { background: #fff; }
+.tocht .vakje.steen.eind { width: 8.6%; border: 6px solid #f0b400; background: #fff3c4; box-shadow: 0 0 0 4px rgba(255, 255, 255, .85); }
+.tocht .vakje.steen.eind.vol { background: #fff8dc; }
+.tocht.kiest .vakje.steen:not(.doel):not(.vol) { opacity: .4; }
+.tocht.kiest .loper { display: none; }
+.tocht .vakje.steen.doel, .tocht .vakje.steen.eind.doel { border: 6px solid var(--paars); background: #fff; }
+.tocht .pijl {
+  position: absolute; z-index: 4; pointer-events: none;
+  transform: translate(-50%, -190%); font-size: clamp(30px, 5vw, 52px); line-height: 1;
+  color: var(--paars); text-shadow: 0 0 0 #fff, 0 3px 0 #fff, 0 -3px 0 #fff, 3px 0 0 #fff, -3px 0 0 #fff;
+  animation: pijl-stuiter .8s ease-in-out infinite;
+}
+@keyframes pijl-stuiter { 0%,100% { transform: translate(-50%, -190%); } 50% { transform: translate(-50%, -150%); } }
 .tocht .vakje.steen.doel { border-color: var(--paars); box-shadow: 0 0 0 6px rgba(138, 79, 255, .25); animation: steen-wenk 1.2s ease-in-out infinite; }
 .tocht .vakje.steen.boven { animation: none; transform: translate(-50%, -50%) scale(1.25); background: #efe6ff; }
 .tocht .vakje.steen.net { animation: steen-net .6s ease; }

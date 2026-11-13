@@ -499,6 +499,12 @@
       return u;
     };
     zet("t-huis", tocht.start[0], tocht.start[1] + 22, 120);
+    // Een bordje 'start' boven het huisje.
+    const sx = tocht.start[0], sy = tocht.start[1] - 86;
+    kaart.appendChild(svgEl("rect", { x: sx - 50, y: sy, width: 100, height: 34, rx: 17, fill: "#8a4fff", stroke: "#fff", "stroke-width": 3 }));
+    const st0 = svgEl("text", { x: sx, y: sy + 25, "text-anchor": "middle", "font-size": 25, "font-weight": 700, fill: "#fff", "font-family": "Andika, sans-serif" });
+    st0.textContent = "start";
+    kaart.appendChild(st0);
     const plekken = tocht.levels.map((lvl, i) => {
       const eind = lvl.stappen[lvl.stappen.length - 1];
       const af = geplakt(i).length >= stickers.perLevel;
@@ -517,7 +523,8 @@
     let doel = null;
     const stenen = tocht.levels.map((lvl, l) => lvl.stappen.map((p, i) => {
       const v = document.createElement("span");
-      v.className = "vakje steen";
+      // De vijfde stap is het einde van het level: groter, met een dikke gouden rand.
+      v.className = "vakje steen" + (i === lvl.stappen.length - 1 ? " eind" : "");
       Object.assign(v.style, pct(p));
       const id = geplakt(l)[i];
       if (id) {
@@ -530,6 +537,17 @@
       vak.appendChild(v);
       return v;
     }));
+
+    // Bij het plakken: een stuiterende pijl wijst de ene steen aan waar de sticker op mag.
+    vak.classList.toggle("kiest", !!doel);
+    if (doel) {
+      const pijl = document.createElement("span");
+      pijl.className = "pijl";
+      pijl.textContent = "▼";
+      pijl.style.left = doel.style.left;
+      pijl.style.top = doel.style.top;
+      vak.appendChild(pijl);
+    }
 
     const loper = svgEl("svg", { class: "loper", viewBox: "0 0 160 150" });
     loper.appendChild(svgEl("use", { href: "#t-kat" }));
@@ -592,7 +610,7 @@
         window.removeEventListener("pointerup", los);
         window.removeEventListener("pointercancel", los);
         doel.classList.remove("boven");
-        if (raakt()) { plak(zweef, id, level, doel); return; }
+        if (raakt()) { const pijl = doel.parentNode.querySelector(".pijl"); if (pijl) pijl.remove(); plak(zweef, id, level, doel); return; }
         zweef.remove();
         img.style.visibility = "";
       };
