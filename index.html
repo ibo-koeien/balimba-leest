@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/stijl.css?v=202611131708">
+<link rel="stylesheet" href="css/stijl.css?v=202611131950">
 </head>
 <body data-vorm="alleen">
 
@@ -55,7 +55,8 @@
     <circle cx="46" cy="100" r="9" fill="#ff9a9a" opacity=".75"/><circle cx="114" cy="100" r="9" fill="#ff9a9a" opacity=".75"/>
     <circle cx="60" cy="88" r="6.8" fill="#2b1b4a"/><circle cx="62.4" cy="85.6" r="2.3" fill="#fff"/>
     <circle cx="100" cy="88" r="6.8" fill="#2b1b4a"/><circle cx="102.4" cy="85.6" r="2.3" fill="#fff"/>
-    <path d="M51 82 l-5 -4 M53 79 l-3 -5 M109 82 l5 -4 M107 79 l3 -5" stroke="#2b1b4a" stroke-width="2" stroke-linecap="round"/>
+    <g fill="rgba(255,255,255,.3)" stroke="#ff4f9e" stroke-width="4"><circle cx="60" cy="88" r="14.5"/><circle cx="100" cy="88" r="14.5"/></g>
+    <path d="M74.5 87 Q80 82 85.5 87 M45.5 86 L33 82 M114.5 86 L127 82" fill="none" stroke="#ff4f9e" stroke-width="3.6" stroke-linecap="round"/>
     <path d="M80 101 c-4 -5 -9 1 0 7 c9 -6 4 -12 0 -7z" fill="#3d2a55"/>
     <path d="M80 108 q-5 7 -11 3 M80 108 q5 7 11 3" fill="none" stroke="#3d2a55" stroke-width="2.3" stroke-linecap="round"/>
     <path d="M52 106 l-20 -3 M52 111 l-19 4 M108 106 l20 -3 M108 111 l19 4" stroke="#3d2a55" stroke-width="1.8" stroke-linecap="round"/>
@@ -74,7 +75,8 @@
       <ellipse cx="120" cy="98" rx="31" ry="21" fill="#ead9c6"/>
       <circle cx="104" cy="72" r="5.6" fill="#2b1b4a"/><circle cx="106" cy="70" r="2" fill="#fff"/>
       <circle cx="136" cy="72" r="5.6" fill="#2b1b4a"/><circle cx="138" cy="70" r="2" fill="#fff"/>
-      <path d="M95 62 q9 -5 17 0 M128 62 q8 -5 17 0" fill="none" stroke="#2a2638" stroke-width="3" stroke-linecap="round"/>
+      <g fill="rgba(255,255,255,.22)" stroke="#16131f" stroke-width="4.5"><circle cx="104" cy="72" r="13.5"/><circle cx="136" cy="72" r="13.5"/></g>
+      <path d="M117.5 71 Q120 68 122.5 71 M90.5 70 L77 67 M149.5 70 L163 67" fill="none" stroke="#16131f" stroke-width="4" stroke-linecap="round"/>
       <path d="M114 86 q6 -5 12 0 l-6 6z" fill="#2a2638"/>
       <path d="M102 100 Q120 118 138 100Z" fill="#7a2e4a" stroke="#2a2638" stroke-width="2.5" stroke-linejoin="round"/>
       <path d="M111 108 Q120 115 129 108 Q120 104 111 108Z" fill="#ff8fab"/>
@@ -234,7 +236,8 @@
       <ellipse cx="120" cy="98" rx="31" ry="21" fill="#ead9c6"/>
       <circle cx="104" cy="72" r="5.6" fill="#2b1b4a"/><circle cx="106" cy="70" r="2" fill="#fff"/>
       <circle cx="136" cy="72" r="5.6" fill="#2b1b4a"/><circle cx="138" cy="70" r="2" fill="#fff"/>
-      <path d="M95 62 q9 -5 17 0 M128 62 q8 -5 17 0" fill="none" stroke="#2a2638" stroke-width="3" stroke-linecap="round"/>
+      <g fill="rgba(255,255,255,.22)" stroke="#16131f" stroke-width="4.5"><circle cx="104" cy="72" r="13.5"/><circle cx="136" cy="72" r="13.5"/></g>
+      <path d="M117.5 71 Q120 68 122.5 71 M90.5 70 L77 67 M149.5 70 L163 67" fill="none" stroke="#16131f" stroke-width="4" stroke-linecap="round"/>
       <path d="M114 86 q6 -5 12 0 l-6 6z" fill="#2a2638"/>
       <path d="M102 100 Q120 118 138 100Z" fill="#7a2e4a" stroke="#2a2638" stroke-width="2.5" stroke-linejoin="round"/>
       <path d="M111 108 Q120 115 129 108 Q120 104 111 108Z" fill="#ff8fab"/>
@@ -243,6 +246,7 @@
   </svg>
   <div class="duo dans" id="klaarDuo" aria-hidden="true"><svg class="dier"><use href="#t-aap"/></svg><svg class="dier"><use href="#t-kat"/></svg></div>
   <div class="sterren eind" id="eindsterren" aria-hidden="true"></div>
+  <div class="kiezer voortgang" id="klaarRondes" aria-hidden="true"></div>
   <div class="keuze">
     <button class="rond goed" id="verder" aria-label="Volgende ronde">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z" fill="currentColor"/></svg>
@@ -271,7 +275,7 @@
   <button class="rond stil" id="finaleHuis" aria-label="Terug naar het begin"><span>⌂</span></button>
 </section>
 
-<script>window.BALIMBA_VERSIE = "202611131708";</script>
-<script src="js/spel.js?v=202611131708"></script>
+<script>window.BALIMBA_VERSIE = "202611131950";</script>
+<script src="js/spel.js?v=202611131950"></script>
 </body>
 </html>

@@ -293,6 +293,7 @@
     st.bezig = false;
     st.t0 = performance.now();
     st.tOor = null;
+    st.herkansing = false;      // wordt waar na een tik op 'nog een keer'
 
     const el = $("woord");
     el.textContent = item.w;
@@ -308,8 +309,7 @@
     oor.classList.toggle("onzichtbaar", !kanHoren(item.w));
     oor.classList.toggle("wenk", !st.gehoord);
     goed.classList.toggle("onzichtbaar", !st.gehoord);
-    // Een woord dat al terugkwam, mag na het luisteren gewoon door.
-    opnieuw.classList.toggle("onzichtbaar", !st.gehoord || item.terug);
+    opnieuw.classList.toggle("onzichtbaar", !st.gehoord);
   }
 
   // De hoeveelste keer dat ze dit level doorloopt (1 = de eerste keer).
@@ -330,7 +330,7 @@
       oor: kanHoren(item.w),
       doorgang: doorgangNr(plek.level),
       ms: Math.round(performance.now() - st.t0),
-      terug: item.terug,
+      terug: !!(item.terug || st.herkansing),
       uitkomst,
       t: Date.now()
     });
@@ -404,16 +404,20 @@
     volgende(650);
   }
 
-  // Ze had het niet goed: een aanmoediging, en het woord komt aan het eind van de ronde terug.
+  // Ze had het niet goed: een aanmoediging, en ze leest hetzelfde woord meteen nog een keer.
   function opOpnieuw() {
     if (!st || st.bezig || !st.gehoord) return;
-    const item = nu(), ronde = st;
-    st.bezig = true;
+    const item = nu();
     speelAf($("woord"), "wiebel");
     dieren("moedig");
-    schrijfMeting(item, "nog een keer");
-    st.rij.push({ w: item.w, terug: true, sterGehad: false });
-    zegZin("nogEens").then((duur) => { if (st === ronde) volgende(Math.max(1100, (duur || 0) * 1000 + 250)); });
+    // Alleen de eerste poging telt voor de leestijd; de herkansing wordt apart gemerkt.
+    if (!st.herkansing) schrijfMeting(item, "nog een keer");
+    st.herkansing = true;
+    st.gehoord = !kanHoren(item.w);
+    st.t0 = performance.now();
+    st.tOor = null;
+    zetKnoppen();
+    zegZin("nogEens");
   }
 
   function opOor() {
@@ -430,7 +434,7 @@
     fanfare();
 
     // Deze ronde telt mee voor de lopende doorgang van het level.
-    const l = plek.level, n = aantalRondes(l);
+    const l = plek.level, n = aantalRondes(l), rondeNu = plek.ronde;
     const d = haal("doorgang");
     const gedaan = new Set(d[l] || []);
     gedaan.add(plek.ronde);
@@ -454,6 +458,17 @@
       if (!d[l].includes(r)) { plek.ronde = r; break; }
     }
     bewaarPlek();
+
+    // Hoe ver is ze in dit level? Zes rondjes, met een ster bij elke ronde die al gespeeld is.
+    const klaarNu = gedaan.size >= n ? new Set([...Array(n).keys()]) : gedaan;
+    const rij = $("klaarRondes");
+    rij.innerHTML = "";
+    for (let r = 0; r < n; r++) {
+      const b = document.createElement("span");
+      b.className = "kies" + (klaarNu.has(r) ? " gedaan" : "") + (r === rondeNu ? " net" : "");
+      b.textContent = String(r + 1);
+      rij.appendChild(b);
+    }
     $("verder").classList.toggle("verborgen", verdiend);
     $("naarSticker").classList.toggle("verborgen", !verdiend);
     // Heel level rond: De Grote Aap danst. Anders dansen de aap en het katje klein.

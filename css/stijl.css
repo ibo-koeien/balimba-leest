@@ -331,3 +331,9 @@ body[data-vorm="alleen"] .goed .duim { display: inline; }
 @keyframes aap-been { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
 @keyframes aap-vonk { 0%,100% { transform: scale(.9); opacity: .5; } 50% { transform: scale(1.08); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .gorilla * { animation: none !important; } }
+
+/* Na een ronde: de zes rondes van het level, met een ster bij wat al gespeeld is */
+.voortgang { gap: clamp(8px, 1.6vw, 14px); }
+.voortgang .kies { display: grid; place-items: center; pointer-events: none; opacity: .5; border-style: dashed; }
+.voortgang .kies.gedaan { opacity: 1; border-style: solid; border-color: var(--goud); background: #fff8dc; }
+.voortgang .kies.net { animation: hup .7s ease .5s 2; }
