@@ -44,6 +44,12 @@
         "id": "level-klaar-2",
         "tekst": "Je hebt een sticker verdiend. Wat knap van jou!"
       }
+    ],
+    "alleKlaar": [
+      {
+        "id": "alle-klaar-1",
+        "tekst": "Je hebt de hele tocht gedaan! De Grote Aap is ontzettend trots op jou!"
+      }
     ]
   }
 }

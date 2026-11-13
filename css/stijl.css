@@ -252,40 +252,64 @@ body[data-vorm="alleen"] .goed .duim { display: inline; }
 .strook.wenk { animation: wenk 1.2s ease-in-out infinite; }
 .rond.plak { background: #ff7fbf; box-shadow: 0 9px 0 #d4569a; }
 
-#kiezen { gap: clamp(18px, 3vw, 32px); }
+#kiezen { gap: 12px; justify-content: center; }
 .vel {
-  background: #fff; border: 4px solid var(--rand); border-radius: 32px; box-shadow: 0 10px 0 var(--rand);
-  padding: clamp(16px, 3vw, 28px) clamp(20px, 4vw, 40px);
-  display: grid; grid-template-columns: repeat(3, auto); gap: clamp(12px, 2.4vw, 24px) clamp(20px, 4vw, 44px);
+  background: #fff; border: 4px solid var(--rand); border-radius: 28px; box-shadow: 0 8px 0 var(--rand);
+  padding: 10px clamp(14px, 3vw, 28px);
+  display: flex; gap: clamp(8px, 2vw, 22px); align-items: center; justify-content: center;
 }
-.vel .sticker { width: clamp(92px, 14.5vw, 138px); height: auto; display: block; touch-action: none; cursor: grab; }
+.vel .sticker { width: clamp(72px, 11.5vw, 112px); height: auto; display: block; touch-action: none; cursor: grab; }
 .zweef { position: fixed; z-index: 20; pointer-events: none; transform: scale(1.15) rotate(-4deg); }
 .zweef.landt { transition: left .25s ease, top .25s ease, width .25s ease, transform .25s ease; transform: none; }
 
-#stickerbord { gap: 10px; }
-.bordkop { width: 100%; display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; }
-.duo.mini .dier { width: clamp(64px, 9vw, 92px); }
-.bordrijen { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: clamp(6px, 1.3vh, 12px); }
-.bordrij {
-  display: flex; align-items: center; gap: clamp(12px, 2.2vw, 22px);
-  background: rgba(255, 255, 255, .72); border-radius: 999px; padding: 8px clamp(14px, 2.4vw, 26px);
+/* ---------- De tocht ---------- */
+#stickerbord { justify-content: center; }
+.klein.hoek { position: absolute; left: 16px; top: calc(12px + env(safe-area-inset-top)); z-index: 5; }
+.tocht {
+  --rest: 60px;
+  position: relative; flex: none;
+  aspect-ratio: 1000 / 700;
+  width: min(100%, calc((100vh - var(--rest)) * 1000 / 700));
+  width: min(100%, calc((100dvh - var(--rest)) * 1000 / 700));
 }
-.bordrij.actief { background: #fff; box-shadow: 0 0 0 4px var(--paars); }
-.bordrij .vakje { width: clamp(58px, min(9.5vw, 9.2vh), 84px); height: clamp(58px, min(9.5vw, 9.2vh), 84px); }
-.levelnr {
-  width: 52px; height: 52px; border-radius: 50%; flex: none;
-  background: var(--paars); color: #fff; font-size: 28px; font-weight: 700;
-  display: grid; place-items: center;
+#kiesTocht { --rest: clamp(190px, 26vh, 230px); }
+.tocht > svg.kaart { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.tocht .plek { transition: opacity .6s, filter .6s; opacity: .62; filter: grayscale(.7); }
+.tocht .plek.af { opacity: 1; filter: none; }
+.tocht .plek.net { animation: plek-af 1s ease; transform-box: fill-box; transform-origin: 50% 100%; }
+.tocht .vakje.steen {
+  position: absolute; width: 6.6%; height: auto; aspect-ratio: 1; transform: translate(-50%, -50%);
+  border-width: 3px; background: rgba(255, 255, 255, .9);
 }
-.kroontje { width: 44px; font-size: 36px; text-align: center; visibility: hidden; }
-.bordrij.vol .kroontje { visibility: visible; }
-@media (prefers-reduced-motion: reduce) { .vakje, .strook { animation: none !important; } }
+.tocht .vakje.steen.vol { background: #fff; }
+.tocht .vakje.steen.doel { border-color: var(--paars); box-shadow: 0 0 0 6px rgba(138, 79, 255, .25); animation: steen-wenk 1.2s ease-in-out infinite; }
+.tocht .vakje.steen.boven { animation: none; transform: translate(-50%, -50%) scale(1.25); background: #efe6ff; }
+.tocht .vakje.steen.net { animation: steen-net .6s ease; }
+.tocht .loper {
+  position: absolute; width: 7.4%; aspect-ratio: 160 / 150; transform: translate(-10%, -112%);
+  transition: left 1.1s ease-in-out, top 1.1s ease-in-out; z-index: 3; pointer-events: none; overflow: visible;
+}
+.tocht .loper.loopt { animation: loper-hup .37s ease-in-out 3; }
+@keyframes steen-wenk { 0%,100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.14); } }
+@keyframes steen-net { 0%,100% { transform: translate(-50%, -50%) scale(1); } 40% { transform: translate(-50%, -50%) scale(1.3); } }
+@keyframes loper-hup { 0%,100% { margin-top: 0; } 50% { margin-top: -3%; } }
+@keyframes plek-af { 0% { transform: scale(1); } 35% { transform: scale(1.25) rotate(-4deg); } 65% { transform: scale(1.12) rotate(3deg); } 100% { transform: scale(1); } }
+
+/* ---------- Finale ---------- */
+#finale { justify-content: center; gap: 24px; overflow: hidden; }
+.feest { display: flex; align-items: flex-end; justify-content: center; gap: clamp(8px, 3vw, 36px); z-index: 1; }
+.feest .dier { width: clamp(110px, 18vw, 180px); animation: dans 1.2s ease-in-out infinite; }
+.feest .dier:last-child { animation-delay: -.6s; }
+.confetti { position: absolute; inset: 0; pointer-events: none; }
+.confetti i { position: absolute; top: -40px; width: 14px; height: 22px; border-radius: 4px; animation: val linear infinite; }
+@keyframes val { to { transform: translateY(110vh) rotate(720deg); } }
+@media (prefers-reduced-motion: reduce) { .vakje, .strook, .confetti i, .tocht .loper, .tocht .plek { animation: none !important; } }
 
 /* ---------- De Grote Aap: danst als een heel level rond is ---------- */
 .gorilla { width: clamp(200px, 34vw, 320px); height: auto; overflow: visible; }
 .gorilla .g-lijf { transform-origin: 120px 240px; animation: aap-lijf .8s ease-in-out infinite; }
-.gorilla .g-arm.g-links { transform-origin: 74px 116px; animation: aap-arm-l .8s ease-in-out infinite; }
-.gorilla .g-arm.g-rechts { transform-origin: 166px 116px; animation: aap-arm-r .8s ease-in-out infinite; }
+.gorilla .g-arm.g-links { transform-origin: 66px 124px; animation: aap-arm-l .8s ease-in-out infinite; }
+.gorilla .g-arm.g-rechts { transform-origin: 174px 124px; animation: aap-arm-r .8s ease-in-out infinite; }
 .gorilla .g-been.g-links { animation: aap-been .8s ease-in-out infinite; }
 .gorilla .g-been.g-rechts { animation: aap-been .8s ease-in-out -.4s infinite; }
 .gorilla .g-vonk { transform-origin: 120px 110px; animation: aap-vonk 1.6s ease-in-out infinite; }

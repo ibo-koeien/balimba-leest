@@ -21,6 +21,7 @@
   let inst = null;          // inhoud van instellingen.json
   let opnames = { woorden: [], zinnen: [] };   // inhoud van opnames.json
   let stickers = { perLevel: 5, keuzePerVel: 6, stickers: [] };   // inhoud van stickers.json
+  let tocht = null;         // inhoud van tocht.json: waar de stapstenen en de plekken liggen
   let plek = opslag.lees("balimba.plek", { level: 0, ronde: 0 });
   let st = null;            // toestand van de lopende ronde
 
@@ -139,7 +140,7 @@
   }
 
   function toonScherm(naam) {
-    for (const s of ["start", "spel", "klaar", "kiezen", "stickerbord"]) $(s).classList.toggle("verborgen", s !== naam);
+    for (const s of ["start", "spel", "klaar", "kiezen", "stickerbord", "finale"]) $(s).classList.toggle("verborgen", s !== naam);
   }
 
   function speelAf(el, klas) {
@@ -450,13 +451,101 @@
     setTimeout(() => zegZin(trots ? "levelKlaar" : "rondeKlaar"), verdiend ? 1500 : 900);
   }
 
+  // ---------- De tocht: het stickerbord als een pad ----------
+  // Elk level is vijf stappen: vier stapstenen en dan een plek (kasteel, eiland, regenboog...).
+  // Op elke stap plakt ze een sticker. Het katje staat bij de sticker die het laatst is geplakt.
+
+  const SVG = "http://www.w3.org/2000/svg";
+  const svgEl = (naam, attrs) => {
+    const e = document.createElementNS(SVG, naam);
+    for (const k of Object.keys(attrs || {})) e.setAttribute(k, attrs[k]);
+    return e;
+  };
+  const allesAf = () => woorden.levels.every((_, i) => geplakt(i).length >= stickers.perLevel);
+
+  // Waar staat het katje? Bij de laatst geplakte sticker, anders bij het huisje.
+  function katPlek() {
+    const k = opslag.lees("balimba.kat", null);
+    if (k && geplakt(k.level).length > k.i) return tocht.levels[k.level].stappen[k.i];
+    for (let l = woorden.levels.length - 1; l >= 0; l--) {
+      const n = Math.min(geplakt(l).length, stickers.perLevel);
+      if (n > 0) return tocht.levels[l].stappen[n - 1];
+    }
+    return tocht.start;
+  }
+
+  // Tekent de tocht in een vak. Geeft de stenen terug, per level een rij.
+  function tekenTocht(vak, doelLevel) {
+    const B = tocht.breedte, H = tocht.hoogte;
+    const pct = (p) => ({ left: (p[0] / B) * 100 + "%", top: (p[1] / H) * 100 + "%" });
+    vak.innerHTML = "";
+
+    const kaart = svgEl("svg", { class: "kaart", viewBox: "0 0 " + B + " " + H });
+    // Het pad: een vloeiende lijn langs alle stappen.
+    const punten = [tocht.start].concat(...tocht.levels.map((l) => l.stappen));
+    let d = "M" + punten[0][0] + " " + punten[0][1];
+    for (let i = 1; i < punten.length - 1; i++) {
+      const m = [(punten[i][0] + punten[i + 1][0]) / 2, (punten[i][1] + punten[i + 1][1]) / 2];
+      d += " Q" + punten[i][0] + " " + punten[i][1] + " " + m[0] + " " + m[1];
+    }
+    d += " L" + punten[punten.length - 1][0] + " " + punten[punten.length - 1][1];
+    kaart.appendChild(svgEl("path", { d, fill: "none", stroke: "#fff3cf", "stroke-width": 26, "stroke-linecap": "round", "stroke-linejoin": "round", opacity: ".95" }));
+    kaart.appendChild(svgEl("path", { d, fill: "none", stroke: "#f0d9a0", "stroke-width": 4, "stroke-linecap": "round", "stroke-dasharray": "2 16" }));
+
+    const zet = (id, x, y, w, klas) => {
+      const u = svgEl("use", { href: "#" + id, x: x - w / 2, y: y - w * (120 / 140) + 14, width: w, height: w * (120 / 140) });
+      if (klas) u.setAttribute("class", klas);
+      kaart.appendChild(u);
+      return u;
+    };
+    zet("t-huis", tocht.start[0], tocht.start[1] + 22, 120);
+    const plekken = tocht.levels.map((lvl, i) => {
+      const eind = lvl.stappen[lvl.stappen.length - 1];
+      const af = geplakt(i).length >= stickers.perLevel;
+      const u = zet("p-" + lvl.plek, eind[0], eind[1] - 32, lvl.groot ? 180 : 132, "plek" + (af ? " af" : ""));
+      const nr = svgEl("g", {});
+      const bx = eind[0] - (lvl.groot ? 86 : 64), by = eind[1] + 6;
+      nr.appendChild(svgEl("circle", { cx: bx, cy: by, r: 17, fill: "#8a4fff", stroke: "#fff", "stroke-width": 3 }));
+      const t = svgEl("text", { x: bx, y: by + 7, "text-anchor": "middle", "font-size": 20, "font-weight": 700, fill: "#fff", "font-family": "Andika, sans-serif" });
+      t.textContent = String(woorden.levels[i].nummer);
+      nr.appendChild(t);
+      kaart.appendChild(nr);
+      return u;
+    });
+    vak.appendChild(kaart);
+
+    let doel = null;
+    const stenen = tocht.levels.map((lvl, l) => lvl.stappen.map((p, i) => {
+      const v = document.createElement("span");
+      v.className = "vakje steen";
+      Object.assign(v.style, pct(p));
+      const id = geplakt(l)[i];
+      if (id) {
+        v.classList.add("vol");
+        const img = document.createElement("img");
+        img.className = "sticker"; img.alt = ""; img.draggable = false;
+        img.src = "img/stickers/" + id + ".svg";
+        v.appendChild(img);
+      } else if (l === doelLevel && !doel) { v.classList.add("doel"); doel = v; }
+      vak.appendChild(v);
+      return v;
+    }));
+
+    const loper = svgEl("svg", { class: "loper", viewBox: "0 0 160 150" });
+    loper.appendChild(svgEl("use", { href: "#t-kat" }));
+    Object.assign(loper.style, pct(katPlek()));
+    vak.appendChild(loper);
+
+    return { stenen, doel, plekken, loper, pct };
+  }
+
   // ---------- Sticker kiezen en plakken ----------
 
   function toonKiezen(level) {
     stil();
     st = null;
-    $("kiesLevelNr").textContent = String(woorden.levels[level].nummer);
-    const doel = maakVakjes($("kiesVakjes"), level, true);
+    toonScherm("kiezen");
+    const { doel } = tekenTocht($("kiesTocht"), level);
 
     // Een vel met stickers: eerst de stickers die nog nergens geplakt zijn.
     const gebruikt = new Set(Object.values(haal("stickers")).flat());
@@ -471,7 +560,6 @@
       maakSleepbaar(img, id, level, doel);
       vel.appendChild(img);
     }
-    toonScherm("kiezen");
   }
 
   function maakSleepbaar(img, id, level, doel) {
@@ -489,10 +577,10 @@
       img.style.visibility = "hidden";
       const dx = e.clientX - r.left, dy = e.clientY - r.top;
 
-      // Ruim genomen: de sticker hoeft het vakje alleen maar te raken.
+      // Ruim genomen: de sticker hoeft de steen alleen maar te raken.
       const raakt = () => {
         const z = zweef.getBoundingClientRect(), v = doel.getBoundingClientRect();
-        return Math.hypot(z.left + z.width / 2 - (v.left + v.width / 2), z.top + z.height / 2 - (v.top + v.height / 2)) < v.width * 0.95;
+        return Math.hypot(z.left + z.width / 2 - (v.left + v.width / 2), z.top + z.height / 2 - (v.top + v.height / 2)) < Math.max(v.width, 44) * 1.1;
       };
       const beweeg = (ev) => {
         zweef.style.left = ev.clientX - dx + "px";
@@ -515,8 +603,11 @@
   }
 
   function plak(zweef, id, level, doel) {
+    const van = katPlek();                       // waar het katje nu staat
     const s = haal("stickers"); s[level] = (s[level] || []).concat(id); zet("stickers", s);
     const t = haal("tegoed"); t[level] = Math.max(0, (t[level] || 0) - 1); zet("tegoed", t);
+    const i = s[level].length - 1;
+    opslag.schrijf("balimba.kat", { level, i });
 
     const v = doel.getBoundingClientRect();
     zweef.classList.add("landt");
@@ -524,51 +615,72 @@
     zweef.style.left = v.left + v.width * 0.04 + "px";
     zweef.style.top = v.top + v.height * 0.04 + "px";
     doel.classList.remove("doel");
-    fanfare();
-    setTimeout(() => {
-      zweef.remove();
-      maakVakjes($("kiesVakjes"), level, false);
-      const net = $("kiesVakjes").children[geplakt(level).length - 1];
-      if (net) net.classList.add("net");
-    }, 280);
-    setTimeout(() => toonBord(level), 1700);
+    belletje();
+    setTimeout(() => { zweef.remove(); toonBord({ van, level, i }); }, 320);
   }
 
-  // ---------- Stickerbord ----------
-
-  function toonBord(actief) {
-    const el = $("bordrijen");
-    el.innerHTML = "";
-    woorden.levels.forEach((lvl, i) => {
-      const rij = document.createElement("div");
-      rij.className = "bordrij" + (i === actief ? " actief" : "") + (geplakt(i).length >= stickers.perLevel ? " vol" : "");
-      const nr = document.createElement("span");
-      nr.className = "levelnr"; nr.textContent = String(lvl.nummer);
-      const vakjes = document.createElement("div");
-      vakjes.className = "vakjes";
-      const kroon = document.createElement("span");
-      kroon.className = "kroontje"; kroon.textContent = "👑";
-      rij.append(nr, vakjes, kroon);
-      el.appendChild(rij);
-      maakVakjes(vakjes, i, false);
-      // Voor de ouder: een sticker lang ingedrukt houden haalt hem weer weg.
-      [...vakjes.children].forEach((v, plekje) => {
-        if (!v.classList.contains("vol")) return;
-        let timer = null;
-        const stop = () => { clearTimeout(timer); };
-        v.addEventListener("pointerdown", () => {
-          timer = setTimeout(() => {
-            if (!window.confirm("Deze sticker weghalen?")) return;
-            const s = haal("stickers"); s[i].splice(plekje, 1); zet("stickers", s);
-            toonBord(actief);
-          }, 1500);
-        });
-        v.addEventListener("pointerup", stop);
-        v.addEventListener("pointerleave", stop);
-        v.addEventListener("pointercancel", stop);
-      });
-    });
+  // Het bord op volle grootte. Met 'nieuw' loopt het katje naar de sticker die net is geplakt.
+  function toonBord(nieuw) {
     toonScherm("stickerbord");
+    const { stenen, plekken, loper, pct } = tekenTocht($("tocht"), -1);
+
+    // Voor de ouder: een sticker lang ingedrukt houden haalt hem weer weg.
+    stenen.forEach((rij, l) => rij.forEach((v, i) => {
+      if (!v.classList.contains("vol")) return;
+      let timer = null;
+      const stop = () => clearTimeout(timer);
+      v.addEventListener("pointerdown", () => {
+        timer = setTimeout(() => {
+          if (!window.confirm("Deze sticker weghalen?")) return;
+          const s = haal("stickers"); s[l].splice(i, 1); zet("stickers", s);
+          toonBord();
+        }, 1500);
+      });
+      for (const soort of ["pointerup", "pointerleave", "pointercancel"]) v.addEventListener(soort, stop);
+    }));
+
+    if (!nieuw) return;
+    const levelAf = geplakt(nieuw.level).length >= stickers.perLevel;
+    stenen[nieuw.level][nieuw.i].classList.add("net");
+    if (levelAf) plekken[nieuw.level].classList.remove("af");     // kleurt zo meteen in
+    Object.assign(loper.style, pct(nieuw.van));
+    void loper.getBoundingClientRect();
+    setTimeout(() => {
+      loper.classList.add("loopt");
+      Object.assign(loper.style, pct(tocht.levels[nieuw.level].stappen[nieuw.i]));
+    }, 350);
+    setTimeout(() => {
+      if (levelAf) { plekken[nieuw.level].classList.add("af", "net"); fanfare(); } else { belletje(); }
+    }, 1500);
+    if (allesAf()) setTimeout(toonFinale, 4200);
+  }
+
+  // ---------- Finale: alle dertig stickers zijn geplakt ----------
+
+  function toonFinale() {
+    toonScherm("finale");
+    const feest = $("feest");
+    feest.innerHTML = "";
+    const dier = (id) => { const d = svgEl("svg", { class: "dier", viewBox: "0 0 160 150" }); d.appendChild(svgEl("use", { href: "#" + id })); return d; };
+    const aap = $("gorilla").cloneNode(true);
+    aap.removeAttribute("id"); aap.classList.remove("verborgen");
+    feest.append(dier("t-eenhoorn"), aap, dier("t-kat"));
+
+    const conf = $("confetti");
+    conf.innerHTML = "";
+    const kleuren = ["#ff8fb0", "#ffbe7a", "#ffe680", "#9be0a4", "#8fc7ff", "#c3a6ff", "#ffd24a"];
+    for (let i = 0; i < 60; i++) {
+      const c = document.createElement("i");
+      c.style.left = Math.random() * 100 + "%";
+      c.style.background = kleuren[i % kleuren.length];
+      c.style.animationDuration = 2.5 + Math.random() * 3 + "s";
+      c.style.animationDelay = -Math.random() * 5 + "s";
+      conf.appendChild(c);
+    }
+    fanfare();
+    setTimeout(fanfare, 900);
+    const soort = (inst.zinnen.alleKlaar || []).some((x) => opnames.zinnen.includes(x.id)) ? "alleKlaar" : "levelKlaar";
+    setTimeout(() => zegZin(soort), 1900);
   }
 
   function naarStart() {
@@ -597,11 +709,14 @@
       // Ontbreekt de lijst met opnames, dan speelt het spel zonder stem.
       opnames = await haalJson("data/opnames.json").catch(() => opnames);
       stickers = await haalJson("data/stickers.json").catch(() => stickers);
+      tocht = await haalJson("data/tocht.json");
       if (!woorden.levels[plek.level] || plek.ronde >= aantalRondes(plek.level)) plek = { level: 0, ronde: 0 };
       neemOudeRondesMee();
       vulStart();
       // Voorbeeld voor de ouder: index.html?toon=aap laat de dansende aap zien, zonder iets te bewaren.
-      if (new URLSearchParams(location.search).get("toon") === "aap") {
+      const toon = new URLSearchParams(location.search).get("toon");
+      if (toon === "finale") toonFinale();
+      if (toon === "aap") {
         maakSterren($("eindsterren"), inst.rondeGrootte, inst.rondeGrootte);
         $("gorilla").classList.remove("verborgen");
         $("klaarDuo").classList.add("verborgen");
@@ -622,12 +737,13 @@
   $("naarHuis").addEventListener("click", naarStart);
   $("klaarHuis").addEventListener("click", naarStart);
   $("bordHuis").addEventListener("click", naarStart);
+  $("finaleHuis").addEventListener("click", naarStart);
   $("verder").addEventListener("click", startRonde);
   $("naarSticker").addEventListener("click", () => toonKiezen(plek.level));
   // Het stickerbord. Ligt er nog een verdiende sticker klaar, dan eerst die plakken.
   $("naarBord").addEventListener("click", () => {
     const l = levelMetTegoed();
-    if (l >= 0) toonKiezen(l); else toonBord(plek.level);
+    if (l >= 0) toonKiezen(l); else toonBord();
   });
 
   laad();
