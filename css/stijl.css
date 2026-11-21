@@ -337,3 +337,19 @@ body[data-vorm="alleen"] .goed .duim { display: inline; }
 .voortgang .kies { display: grid; place-items: center; pointer-events: none; opacity: .5; border-style: dashed; }
 .voortgang .kies.gedaan { opacity: 1; border-style: solid; border-color: var(--goud); background: #fff8dc; }
 .voortgang .kies.net { animation: hup .7s ease .5s 2; }
+
+/* ---------- Bonuslevel (ui) ---------- */
+.kies.bonus { width: auto; min-width: 58px; padding: 0 12px; background: #f3e6ff; border-color: #c99aee; color: #7a3fb8; }
+.kies.bonus.actief { background: #9a5fd0; border-color: #9a5fd0; color: #fff; }
+.vakje .mini-ui { width: 88%; height: 88%; display: block; }
+#uifeest { justify-content: center; gap: 18px; overflow: hidden; }
+.uitekst { z-index: 1; font-size: clamp(64px, 12vw, 120px); font-weight: 700; color: #9a5fd0; text-shadow: 0 5px 0 #fff, 0 8px 0 #e3d6f7; display: flex; }
+.uitekst span { display: inline-block; animation: letter-hup 1s ease-in-out infinite; }
+.uitekst span:nth-child(2n) { animation-delay: -.5s; }
+.feest.ui .groot-ui { width: clamp(150px, 24vw, 230px); animation: ui-dans .9s ease-in-out infinite; }
+.tocht .plek .wieken, .feest .wieken { transform-origin: 70px 48px; }
+.tocht .plek.af .wieken { animation: draai 6s linear infinite; }
+@keyframes letter-hup { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
+@keyframes ui-dans { 0%,100% { transform: rotate(-8deg) translateY(0); } 50% { transform: rotate(8deg) translateY(-16px); } }
+@keyframes draai { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .uitekst span, .feest.ui .groot-ui, .wieken { animation: none !important; } }

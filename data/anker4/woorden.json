@@ -1,0 +1,126 @@
+{
+  "levels": [
+    {
+      "nummer": 1,
+      "naam": "oe g ei f au 1",
+      "woorden": [
+        "zaag", "sein", "fuif", "leeg", "feit", "laf", "gaaf", "woef", "joeg", "zoef",
+        "goor", "teef", "boog", "kous", "ruig", "rein", "nog", "jouw", "kauw", "gal",
+        "mug", "fop", "fik", "waag", "guur", "leg", "lef", "laag", "af", "rijg",
+        "gaan", "paf", "zout", "wei", "fit", "maf", "buig", "mouw", "fout", "rouw",
+        "log", "faal", "mei", "geen", "tuig", "jaag", "vaag", "geur", "dief", "zeg",
+        "touw", "deug", "lijf", "bouw", "wuif", "tof", "nauw", "heil", "voeg", "zoog"
+      ]
+    },
+    {
+      "nummer": 2,
+      "naam": "oe g ei f au 2",
+      "woorden": [
+        "gaat", "zuig", "hief", "mag", "pauw", "loog", "zei", "hoef", "roof", "kuif",
+        "gum", "kei", "lof", "hef", "gier", "oog", "fel", "dein", "geul", "paus",
+        "rif", "zeis", "bout", "maag", "of", "zou", "doof", "duif", "geit", "weg",
+        "gauw", "haag", "lei", "fee", "big", "peil", "zag", "giet", "saus", "nou",
+        "gen", "suf", "leef", "gein", "veeg", "hei", "poef", "wieg", "kou", "beef",
+        "hout", "hoog", "fuik", "gat", "weef", "wou", "loof", "weeg", "dof", "duf"
+      ]
+    },
+    {
+      "nummer": 3,
+      "naam": "oe g ei f au 3",
+      "woorden": [
+        "muf", "heg", "gil", "raaf", "dag", "gun", "boef", "gek", "neef", "vijf",
+        "hou", "puf", "boeg", "lag", "reeg", "wijf", "rog", "faam", "lauw", "lief",
+        "goot", "zeil", "vouw", "zeug", "gaap", "reis", "gaf", "jou", "poog", "fok",
+        "rauw", "woog", "gaar", "juf", "hof", "vijg", "gaas", "hijg", "lig", "lieg",
+        "zeef", "geel", "eik", "gas", "rug", "geef", "bof", "fijn", "gul", "deeg",
+        "teil", "dauw", "gok", "gif", "eis", "gein", "buig", "mouw", "fout", "rouw"
+      ]
+    },
+    {
+      "nummer": 4,
+      "naam": "ng ch",
+      "woorden": [
+        "zacht", "kocht", "recht", "hecht", "pech", "ding", "kucht", "zang", "bocht", "pacht",
+        "joch", "jacht", "zucht", "toch", "long", "dacht", "ging", "rang", "lang", "mocht",
+        "gong", "juicht", "zicht", "vacht", "dicht", "gang", "zing", "ving", "hang", "tucht",
+        "ping", "kuch", "hing", "lacht", "vang", "tocht", "tong", "jong", "zong", "lucht",
+        "zocht", "ring", "bang", "vecht", "tang", "macht", "wang", "meng", "echt", "wacht",
+        "nacht", "lach", "acht", "juich", "pang", "nicht", "vocht", "richt", "licht", "biecht"
+      ]
+    },
+    {
+      "nummer": 5,
+      "naam": "mkmm- en mmkm-woorden 1",
+      "woorden": [
+        "blauw", "draag", "fles", "greep", "stof", "droog", "groen", "slag", "zweeg", "brug",
+        "drong", "kring", "durf", "wolf", "slang", "lift", "vlieg", "steeg", "tocht", "trouw",
+        "zelf", "vroeg", "groot", "vrouw", "echt", "bleef", "kreeg", "erg", "langs", "krijg",
+        "blijf", "klein", "vraag", "licht", "graag", "lucht", "nacht", "groep", "breng", "dicht",
+        "sloeg", "half", "recht", "zacht", "droeg", "volg", "brief", "macht", "glas", "feest",
+        "film", "geest", "vlug", "acht", "fiets", "gras", "vloog", "trein", "zorg", "berg"
+      ]
+    },
+    {
+      "nummer": 6,
+      "naam": "mkmm- en mmkm-woorden 2",
+      "woorden": [
+        "dreig", "gram", "plof", "klei", "grof", "wrijf", "gans", "snoof", "groet", "floot",
+        "kraag", "grauw", "kloof", "steil", "fort", "zweef", "brein", "kalf", "klaag", "borg",
+        "grap", "stijf", "slaag", "fris", "dwong", "traag", "flauw", "vlag", "slaaf", "tref",
+        "staf", "graan", "zicht", "dwing", "drijf", "fluit", "bocht", "stijg", "braaf", "erf",
+        "plein", "sfeer", "elf", "graf", "jacht", "dreef", "grijs", "trof", "zwijg", "proef",
+        "gast", "vacht", "fruit", "grot", "golf", "dring", "graaf", "grijp", "verf", "wreef"
+      ]
+    },
+    {
+      "nummer": 7,
+      "naam": "mmkmm-woorden",
+      "woorden": [
+        "groots", "pleegt", "flits", "zwierf", "snauwt", "drift", "sticht", "glimt", "plaagt", "proeft",
+        "graaft", "slurf", "kreeft", "gluurt", "vracht", "snuift", "glimp", "blaft", "frons", "kleeft",
+        "blijft", "krijgt", "vraagt", "bracht", "brengt", "kracht", "slecht", "draagt", "twaalf", "stierf",
+        "vliegt", "grens", "vlucht", "sterf", "dringt", "grijpt", "zwijgt", "knecht", "stijgt", "tracht",
+        "trouwt", "treft", "drijft", "dreigt", "slaagt", "dwingt", "plicht", "vrucht", "wrijft", "klacht",
+        "glans", "gromt", "zweeft", "dwerg", "grijns", "klaagt", "pracht", "front", "droogt", "gracht"
+      ]
+    },
+    {
+      "nummer": 8,
+      "naam": "twee- en drieletterclusters",
+      "woorden": [
+        "bangst", "sterft", "streng", "laagst", "leegst", "blauwst", "gekst", "vlugst", "fijnst", "vaagst",
+        "oogst", "droogst", "felst", "burcht", "strengst", "streeft", "streef", "grijnst", "glanst", "traagst",
+        "zelfs", "grootst", "langst", "slechts", "volgt", "angst", "sprong", "kleinst", "liefst", "zorgt",
+        "hoogst", "helft", "jongst", "vroegst", "rechts", "durft", "springt", "films", "spring", "straf",
+        "fietst", "gunst", "stijfst", "trouwst", "grenst", "grofst", "peinst", "flitst", "vangst", "straft",
+        "braafst", "gerst", "steilst", "fronst", "hengst", "zwerft", "engst", "golft", "bergt", "verft"
+      ]
+    },
+    {
+      "nummer": 9,
+      "naam": "samenstellingen",
+      "woorden": [
+        "dagboek", "afloop", "heimwee", "kauwgom", "voertuig", "rijtuig", "uitweg", "omweg", "halfuur", "doolhof",
+        "roofdier", "zoogdier", "eiwit", "zintuig", "zeilboot", "zoethout", "vaartuig", "ooghoek", "wegdek", "dakgoot",
+        "paasei", "bosbouw", "ijslaag", "maagpijn", "logboek", "lafbek", "heenreis", "doofpot", "heenweg", "toeslag",
+        "huisdier", "dagboek", "afloop", "heelal", "zakdoek", "aandeel", "welzijn", "tiental", "aanpak", "heimwee",
+        "kauwgum", "neusgat", "rijweg", "vijftal", "mijnbouw", "keelgat", "hefboom", "dagtaak", "rugpijn", "tuinbouw",
+        "reistas", "afdak", "eigeel", "aanbouw", "zeereis", "zijweg", "bouwdoos", "vaargeul", "doorreis", "vetlaag"
+      ]
+    }
+  ],
+  "bonus": [
+    {
+      "id": "ui",
+      "nummer": "ui",
+      "label": "ui",
+      "naam": "ui-level",
+      "woorden": [
+        "trui", "kruis", "vuist", "kruip", "snuit", "duif", "kuif", "fuif", "ruig", "buig",
+        "zuig", "tuig", "wuif", "fuik", "struik", "spruit", "fluit", "fruit", "juich", "sluipt",
+        "bruist", "kruipt", "druipt", "snuift", "juicht", "vuilst", "ruimst", "huismus", "huiskat", "pakhuis",
+        "buikpijn", "tuinman", "huisdier", "moestuin", "voortuin", "kerkuil", "duikboot", "uitweg", "voertuig", "zintuig"
+      ]
+    }
+  ]
+}

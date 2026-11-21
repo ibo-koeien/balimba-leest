@@ -22,7 +22,10 @@
   let opnames = { woorden: [], zinnen: [] };   // inhoud van opnames.json
   let stickers = { perLevel: 5, keuzePerVel: 6, stickers: [] };   // inhoud van stickers.json
   let tocht = null;         // inhoud van tocht.json: waar de stapstenen en de plekken liggen
-  let plek = opslag.lees("balimba.plek", { level: 0, ronde: 0 });
+  // Welke anker-editie speelt ze? Elke editie heeft eigen woordenlijsten, een eigen tocht
+  // en eigen voortgang. NS is het voorvoegsel waaronder die voortgang op de iPad staat.
+  let editie = null, editieNr = null, NS = "balimba.";
+  let plek = { level: 0, ronde: 0 };
   let st = null;            // toestand van de lopende ronde
 
   // ---------- Geluid ----------
@@ -140,7 +143,7 @@
   }
 
   function toonScherm(naam) {
-    for (const s of ["start", "spel", "klaar", "kiezen", "stickerbord", "finale"]) $(s).classList.toggle("verborgen", s !== naam);
+    for (const s of ["start", "spel", "klaar", "kiezen", "stickerbord", "finale", "uifeest"]) $(s).classList.toggle("verborgen", s !== naam);
   }
 
   function speelAf(el, klas) {
@@ -159,13 +162,17 @@
     });
   }
 
+  // Alle levels: eerst die van de tocht, daarna de bonuslevels (zoals het ui-level).
+  const alleLevels = () => woorden.levels.concat(woorden.bonus || []);
+  const isBonus = (level) => level >= woorden.levels.length;
+
   function aantalRondes(level) {
-    return Math.ceil(woorden.levels[level].woorden.length / inst.rondeGrootte);
+    return Math.ceil(alleLevels()[level].woorden.length / inst.rondeGrootte);
   }
 
   function rondeWoorden() {
     const n = inst.rondeGrootte;
-    return woorden.levels[plek.level].woorden.slice(plek.ronde * n, (plek.ronde + 1) * n);
+    return alleLevels()[plek.level].woorden.slice(plek.ronde * n, (plek.ronde + 1) * n);
   }
 
   // Kan dit woord worden voorgezegd? Zo niet, dan slaat het spel het luisteren over.
@@ -175,8 +182,8 @@
   // doorgang: welke rondes van een level in de lopende doorgang al gespeeld zijn
   // stickers: welke stickers er per level geplakt zijn (hoogstens stickers.perLevel)
   // tegoed:   verdiende stickers die nog niet geplakt zijn
-  const haal = (naam) => opslag.lees("balimba." + naam, {});
-  const zet = (naam, waarde) => opslag.schrijf("balimba." + naam, waarde);
+  const haal = (naam) => opslag.lees(NS + naam, {});
+  const zet = (naam, waarde) => opslag.schrijf(NS + naam, waarde);
   const rondeGedaan = (level, r) => (haal("doorgang")[level] || []).includes(r);
   const geplakt = (level) => haal("stickers")[level] || [];
   const tegoed = (level) => haal("tegoed")[level] || 0;
@@ -187,8 +194,8 @@
 
   // Eenmalig: rondes die al gespeeld waren voordat het stickerbord bestond, tellen mee.
   function neemOudeRondesMee() {
-    if (opslag.lees("balimba.migratie1", false)) return;
-    const oud = opslag.lees("balimba.gedaan", {}), d = haal("doorgang"), t = haal("tegoed");
+    if (opslag.lees(NS + "migratie1", false)) return;
+    const oud = opslag.lees(NS + "gedaan", {}), d = haal("doorgang"), t = haal("tegoed");
     for (const sleutel of Object.keys(oud)) {
       const [l, r] = sleutel.split("-").map(Number);
       if (!woorden.levels[l] || !oud[sleutel]) continue;
@@ -199,7 +206,7 @@
       if (d[l].length >= aantalRondes(Number(l))) { d[l] = []; t[l] = (t[l] || 0) + 1; }
     }
     zet("doorgang", d); zet("tegoed", t);
-    opslag.schrijf("balimba.migratie1", true);
+    opslag.schrijf(NS + "migratie1", true);
   }
 
   function maakVakjes(el, level, metDoel) {
@@ -221,37 +228,55 @@
     return doel;
   }
 
+  // Bij een bonuslevel: een uitje voor elk feestje dat ze al heeft gevierd, en een leeg rondje voor het volgende.
+  function maakFeestjes(el, level) {
+    el.innerHTML = "";
+    const n = haal("feestjes")[alleLevels()[level].id] || 0;
+    for (let i = 0; i <= Math.min(n, 7); i++) {
+      const v = document.createElement("span");
+      v.className = "vakje" + (i < n ? " vol" : "");
+      if (i < n) {
+        const u = svgEl("svg", { viewBox: "0 0 160 150", class: "mini-ui" });
+        u.appendChild(svgEl("use", { href: "#t-ui" }));
+        v.appendChild(u);
+      }
+      el.appendChild(v);
+    }
+  }
+
   // Rij genummerde knoppen om een level of een ronde te kiezen. Een ster = die ronde is al eens gespeeld.
-  function vulKiezer(el, aantal, actief, heeftSter, opKies) {
+  function vulKiezer(el, aantal, actief, heeftSter, opKies, label) {
     el.innerHTML = "";
     for (let i = 0; i < aantal; i++) {
       const b = document.createElement("button");
-      b.className = "kies" + (i === actief ? " actief" : "") + (heeftSter(i) ? " gedaan" : "");
-      b.textContent = String(i + 1);
+      const tekst = label ? label(i) : String(i + 1);
+      b.className = "kies" + (i === actief ? " actief" : "") + (heeftSter(i) ? " gedaan" : "") + (/^[0-9]+$/.test(tekst) ? "" : " bonus");
+      b.textContent = tekst;
       b.addEventListener("click", () => opKies(i));
       el.appendChild(b);
     }
   }
 
   function bewaarPlek() {
-    const perLevel = opslag.lees("balimba.rondePerLevel", {});
+    const perLevel = opslag.lees(NS + "rondePerLevel", {});
     perLevel[plek.level] = plek.ronde;
-    opslag.schrijf("balimba.rondePerLevel", perLevel);
-    opslag.schrijf("balimba.plek", plek);
+    opslag.schrijf(NS + "rondePerLevel", perLevel);
+    opslag.schrijf(NS + "plek", plek);
   }
   function kiesLevel(i) {
-    const perLevel = opslag.lees("balimba.rondePerLevel", {});
+    const perLevel = opslag.lees(NS + "rondePerLevel", {});
     plek = { level: i, ronde: Math.min(perLevel[i] || 0, aantalRondes(i) - 1) };
     bewaarPlek(); vulStart();
   }
   function kiesRonde(r) { plek.ronde = r; bewaarPlek(); vulStart(); }
 
   function vulStart() {
-    const lvl = woorden.levels[plek.level];
-    $("waar").textContent = lvl.naam;
-    vulKiezer($("levels"), woorden.levels.length, plek.level, () => false, kiesLevel);
+    const lvl = alleLevels()[plek.level];
+    $("waar").textContent = editie.naam + " · " + lvl.naam;
+    vulKiezer($("levels"), alleLevels().length, plek.level, () => false, kiesLevel, (i) => alleLevels()[i].label || String(i + 1));
     vulKiezer($("rondes"), aantalRondes(plek.level), plek.ronde, (r) => rondeGedaan(plek.level, r), kiesRonde);
-    maakVakjes($("ministickers"), plek.level, false);
+    // Op het strookje: de stickers van dit level, of bij een bonuslevel de gevierde feestjes.
+    if (isBonus(plek.level)) maakFeestjes($("ministickers"), plek.level); else maakVakjes($("ministickers"), plek.level, false);
     $("naarBord").classList.toggle("wenk", levelMetTegoed() >= 0);
     $("stilUitleg").classList.toggle("verborgen", rondeWoorden().every(kanHoren));
   }
@@ -319,10 +344,10 @@
   }
 
   function schrijfMeting(item, uitkomst) {
-    const log = opslag.lees("balimba.metingen", []);
+    const log = opslag.lees(NS + "metingen", []);
     log.push({
       w: item.w,
-      level: woorden.levels[plek.level].nummer,
+      level: alleLevels()[plek.level].nummer,
       ronde: plek.ronde + 1,
       // Leestijd: van het verschijnen van het woord tot de eerste tik op het oortje.
       // Zonder opname is er geen oortje; dan telt de tijd tot ze zelf beoordeelt.
@@ -334,7 +359,7 @@
       uitkomst,
       t: Date.now()
     });
-    opslag.schrijf("balimba.metingen", log);
+    opslag.schrijf(NS + "metingen", log);
   }
 
   function geefSter() {
@@ -438,12 +463,16 @@
     const d = haal("doorgang");
     const gedaan = new Set(d[l] || []);
     gedaan.add(plek.ronde);
-    let verdiend = false;
+    let verdiend = false, feest = false;
     if (gedaan.size >= n) {
       // Alle rondes gespeeld: het level is één keer rond. Dat levert een sticker op, tot de rij vol is.
+      // Een bonuslevel levert geen sticker op maar een feestje.
       const nr = haal("doorgangNr"); nr[l] = doorgangNr(l); zet("doorgangNr", nr);
       d[l] = [];
-      if (geplakt(l).length + tegoed(l) < stickers.perLevel) {
+      if (isBonus(l)) {
+        const f = haal("feestjes"), id = alleLevels()[l].id; f[id] = (f[id] || 0) + 1; zet("feestjes", f);
+        feest = true;
+      } else if (geplakt(l).length + tegoed(l) < stickers.perLevel) {
         const t = haal("tegoed"); t[l] = (t[l] || 0) + 1; zet("tegoed", t);
         verdiend = true;
       }
@@ -474,13 +503,34 @@
     // Heel level rond: De Grote Aap danst. Anders dansen de aap en het katje klein.
     $("gorilla").classList.toggle("verborgen", !verdiend);
     $("klaarDuo").classList.toggle("verborgen", verdiend);
+    if (feest) { toonUifeest(); return; }
     const trots = verdiend && (inst.zinnen.levelKlaar || []).some((x) => opnames.zinnen.includes(x.id));
     if (verdiend) setTimeout(fanfare, 700);
     setTimeout(() => zegZin(trots ? "levelKlaar" : "rondeKlaar"), verdiend ? 1500 : 900);
   }
 
+  // ---------- Ui-feestje: het hele ui-level is rond ----------
+  function toonUifeest() {
+    toonScherm("uifeest");
+    const conf = $("uiconfetti");
+    conf.innerHTML = "";
+    const kleuren = ["#c9a6ff", "#ffd24a", "#ff8fb0", "#9be0a4", "#8fc7ff", "#f2c95c"];
+    for (let i = 0; i < 50; i++) {
+      const c = document.createElement("i");
+      c.style.left = Math.random() * 100 + "%";
+      c.style.background = kleuren[i % kleuren.length];
+      c.style.animationDuration = 2.5 + Math.random() * 3 + "s";
+      c.style.animationDelay = -Math.random() * 5 + "s";
+      conf.appendChild(c);
+    }
+    fanfare();
+    setTimeout(fanfare, 800);
+    const soort = (inst.zinnen.uiKlaar || []).some((x) => opnames.zinnen.includes(x.id)) ? "uiKlaar" : "rondeKlaar";
+    setTimeout(() => zegZin(soort), 1500);
+  }
+
   // ---------- De tocht: het stickerbord als een pad ----------
-  // Elk level is vijf stappen: vier stapstenen en dan een plek (kasteel, eiland, regenboog...).
+  // Elk level is een paar stappen (vijf bij anker 3, vier bij anker 4): stapstenen en dan een plek (kasteel, eiland, regenboog...).
   // Op elke stap plakt ze een sticker. Het katje staat bij de sticker die het laatst is geplakt.
 
   const SVG = "http://www.w3.org/2000/svg";
@@ -493,7 +543,7 @@
 
   // Waar staat het katje? Bij de laatst geplakte sticker, anders bij het huisje.
   function katPlek() {
-    const k = opslag.lees("balimba.kat", null);
+    const k = opslag.lees(NS + "kat", null);
     if (k && geplakt(k.level).length > k.i) return tocht.levels[k.level].stappen[k.i];
     for (let l = woorden.levels.length - 1; l >= 0; l--) {
       const n = Math.min(geplakt(l).length, stickers.perLevel);
@@ -536,9 +586,13 @@
     const plekken = tocht.levels.map((lvl, i) => {
       const eind = lvl.stappen[lvl.stappen.length - 1];
       const af = geplakt(i).length >= stickers.perLevel;
-      const u = zet("p-" + lvl.plek, eind[0], eind[1] - 32, lvl.groot ? 180 : 132, "plek" + (af ? " af" : ""));
+      const w = lvl.grootte || (lvl.groot ? 180 : (tocht.plekGrootte || 132));
+      const u = zet("p-" + lvl.plek, eind[0], eind[1] - 32, w, "plek" + (af ? " af" : ""));
       const nr = svgEl("g", {});
-      const bx = eind[0] - (lvl.groot ? 86 : 64), by = eind[1] + 6;
+      // Het nummer staat links naast de eindsteen, of (bij een krappe tocht) linksboven op de plek.
+      const boven = tocht.nummer === "boven";
+      const bx = eind[0] - (boven ? w / 2 - 12 : (lvl.groot ? 86 : 64));
+      const by = boven ? eind[1] - 32 - w * (120 / 140) + 26 : eind[1] + 6;
       nr.appendChild(svgEl("circle", { cx: bx, cy: by, r: 17, fill: "#8a4fff", stroke: "#fff", "stroke-width": 3 }));
       const t = svgEl("text", { x: bx, y: by + 7, "text-anchor": "middle", "font-size": 20, "font-weight": 700, fill: "#fff", "font-family": "Andika, sans-serif" });
       t.textContent = String(woorden.levels[i].nummer);
@@ -653,7 +707,7 @@
     const s = haal("stickers"); s[level] = (s[level] || []).concat(id); zet("stickers", s);
     const t = haal("tegoed"); t[level] = Math.max(0, (t[level] || 0) - 1); zet("tegoed", t);
     const i = s[level].length - 1;
-    opslag.schrijf("balimba.kat", { level, i });
+    opslag.schrijf(NS + "kat", { level, i });
 
     const v = doel.getBoundingClientRect();
     zweef.classList.add("landt");
@@ -747,21 +801,26 @@
 
   async function laad() {
     try {
-      const [w, i] = await Promise.all([
-        haalJson("data/woorden.json"),
-        haalJson("data/instellingen.json")
-      ]);
+      const ed = await haalJson("data/edities.json");
+      editieNr = new URLSearchParams(location.search).get("anker") || ed.standaard;
+      if (!ed.edities[editieNr]) editieNr = ed.standaard;
+      editie = ed.edities[editieNr];
+      NS = editie.opslag;
+      plek = opslag.lees(NS + "plek", { level: 0, ronde: 0 });
+      const [w, i] = await Promise.all([haalJson(editie.woorden), haalJson("data/instellingen.json")]);
       woorden = w; inst = i;
       // Ontbreekt de lijst met opnames, dan speelt het spel zonder stem.
       opnames = await haalJson("data/opnames.json").catch(() => opnames);
       stickers = await haalJson("data/stickers.json").catch(() => stickers);
-      tocht = await haalJson("data/tocht.json");
-      if (!woorden.levels[plek.level] || plek.ronde >= aantalRondes(plek.level)) plek = { level: 0, ronde: 0 };
+      tocht = await haalJson(editie.tocht);
+      stickers.perLevel = editie.stickersPerLevel || stickers.perLevel;
+      if (!alleLevels()[plek.level] || plek.ronde >= aantalRondes(plek.level)) plek = { level: 0, ronde: 0 };
       neemOudeRondesMee();
       vulStart();
       // Voorbeeld voor de ouder: index.html?toon=aap laat de dansende aap zien, zonder iets te bewaren.
       const toon = new URLSearchParams(location.search).get("toon");
       if (toon === "finale") toonFinale();
+      if (toon === "uifeest") toonUifeest();
       if (toon === "aap") {
         maakSterren($("eindsterren"), inst.rondeGrootte, inst.rondeGrootte);
         $("gorilla").classList.remove("verborgen");
@@ -781,7 +840,7 @@
     let timer = null;
     const titel = document.querySelector("#start h1");
     const stop = () => clearTimeout(timer);
-    titel.addEventListener("pointerdown", () => { timer = setTimeout(() => { location.href = "ouders.html"; }, 1500); });
+    titel.addEventListener("pointerdown", () => { timer = setTimeout(() => { location.href = "ouders.html?anker=" + (editieNr || ""); }, 1500); });
     for (const soort of ["pointerup", "pointerleave", "pointercancel"]) titel.addEventListener(soort, stop);
   }
 
@@ -793,6 +852,7 @@
   $("klaarHuis").addEventListener("click", naarStart);
   $("bordHuis").addEventListener("click", naarStart);
   $("finaleHuis").addEventListener("click", naarStart);
+  $("uifeestHuis").addEventListener("click", naarStart);
   $("verder").addEventListener("click", startRonde);
   $("naarSticker").addEventListener("click", () => toonKiezen(plek.level));
   // Het stickerbord. Ligt er nog een verdiende sticker klaar, dan eerst die plakken.

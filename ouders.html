@@ -36,10 +36,10 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Balimba leest · voor ouders</h1>
+    <h1>Balimba leest · voor ouders <span id="editienaam" style="color:var(--paars)"></span></h1>
     <span>
       <button class="knop" id="export">Gegevens bewaren</button>
-      <a class="knop" href="index.html">Terug naar het spel</a>
+      <a class="knop" id="terug" href="index.html">Terug naar het spel</a>
     </span>
   </header>
   <p class="uitleg">
@@ -47,6 +47,7 @@
     zie je de middelste leestijd (de mediaan), zodat een pauze bij een enkel woord niet meetelt.
     Vergelijk alleen binnen hetzelfde level. Alles staat alleen op dit apparaat.
   </p>
+  <div class="tabs" id="edities"></div>
   <div class="demo" id="demo" hidden>Dit zijn verzonnen voorbeeldgegevens om te laten zien hoe het dashboard eruitziet.</div>
 
   <div class="kop" id="kop"></div>
@@ -69,7 +70,7 @@
 </div>
 
 <script>
-(() => {
+(async () => {
   "use strict";
   const $ = (id) => document.getElementById(id);
   const lees = (sleutel, anders) => { try { const v = localStorage.getItem(sleutel); return v == null ? anders : JSON.parse(v); } catch (e) { return anders; } };
@@ -93,7 +94,23 @@
     return uit;
   }
 
-  const alle = demo ? maakDemo() : lees("balimba.metingen", []);
+  // Welke anker-editie? Elke editie heeft eigen metingen.
+  const ed = await fetch("data/edities.json?t=" + Date.now(), { cache: "no-cache" }).then((r) => r.json());
+  let editieNr = new URLSearchParams(location.search).get("anker") || ed.standaard;
+  if (!ed.edities[editieNr]) editieNr = ed.standaard;
+  const NS = ed.edities[editieNr].opslag;
+  $("editienaam").textContent = "· " + ed.edities[editieNr].naam;
+  for (const nr of Object.keys(ed.edities)) {
+    const a = document.createElement("a");
+    a.className = "tab" + (nr === editieNr ? " actief" : "");
+    a.textContent = ed.edities[nr].naam;
+    a.href = "ouders.html?anker=" + nr + (demo ? "&demo" : "");
+    a.style.textDecoration = "none";
+    $("edities").appendChild(a);
+  }
+  $("terug").href = "index.html?anker=" + editieNr;
+
+  const alle = demo ? maakDemo() : lees(NS + "metingen", []);
   $("demo").hidden = !demo;
   // Alleen de eerste keer dat een woord in een ronde verschijnt, en alleen metingen met een leestijd.
   const metingen = alle.filter((m) => m.msLees != null && !m.terug);
@@ -113,7 +130,8 @@
     }).filter((d) => d.n >= 5);
   }
 
-  const levels = [...new Set(metingen.map((m) => m.level))].sort((a, b) => a - b);
+  const levels = [...new Set(metingen.map((m) => m.level))].sort((a, b) => (typeof a === "string") - (typeof b === "string") || (a > b ? 1 : a < b ? -1 : 0));
+  const naamLevel = (l) => (typeof l === "string" ? l + "-level" : "Level " + l);
   let gekozen = levels.length ? levels[levels.length - 1] : null;
 
   function tabel(koppen, rijen) {
@@ -136,7 +154,7 @@
     for (const l of levels) {
       const b = document.createElement("button");
       b.className = "tab" + (l === gekozen ? " actief" : "");
-      b.textContent = "Level " + l;
+      b.textContent = naamLevel(l);
       b.onclick = () => { gekozen = l; teken(); };
       $("tabs").appendChild(b);
     }
@@ -169,7 +187,7 @@
     else {
       const max = Math.max(...eersten.map((x) => x.d.med));
       $("eerste").innerHTML = tabel([{ t: "Level" }, { t: "Wanneer" }, { t: "Leestijd per woord", getal: true }, { t: "", balk: true }, { t: "In één keer goed", getal: true }],
-        eersten.map((x) => ["Level " + x.l, datum(x.d.van), sec(x.d.med), balk(x.d.med, max), Math.round(x.d.goed * 100) + "%"]));
+        eersten.map((x) => [naamLevel(x.l), datum(x.d.van), sec(x.d.med), balk(x.d.med, max), Math.round(x.d.goed * 100) + "%"]));
     }
 
     // Lastige woorden
@@ -204,7 +222,7 @@
   };
 
   teken();
-})();
+})().catch((e) => { document.body.insertAdjacentHTML("beforeend", "<p style='padding:16px'>Het dashboard kon niet laden: " + e.message + "</p>"); });
 </script>
 </body>
 </html>

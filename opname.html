@@ -42,12 +42,13 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Opnames voor Balimba leest</h1>
+  <h1>Opnames voor Balimba leest <span id="editienaam" style="color:var(--paars)"></span></h1>
   <p class="uitleg">
     Spreek elk woord rustig en vriendelijk in: bij korte woorden eerst zoemend, dan het hele woord
     (<i>mmm-aaa-n … maan</i>). De opnames blijven in deze browser bewaard, dus je kunt stoppen en later verdergaan.
     Een woord dat in meer levels staat, hoef je maar één keer in te spreken.
-    Download een deel als het af is en stuur het zipbestand naar Claude.
+    Woorden die al in het spel staan (uit een eerdere lijst), zijn groen en kun je overslaan.
+    Klaar? Kies <b>Download alles wat nieuw is</b> en stuur dat ene zipbestand naar Claude.
   </p>
   <div class="melding verborgen" id="melding"></div>
 
@@ -69,6 +70,7 @@
   <div class="lijst" id="lijst"></div>
 
   <div class="onder">
+    <button class="actie volgende" id="downloadNieuw">Download alles wat nieuw is (zip)</button>
     <button class="actie" id="download">Download dit deel (zip)</button>
     <span id="downloadinfo" class="teller"></span>
   </div>
@@ -126,14 +128,20 @@
 
   // ---------- De delen: zinnen en woorden per level ----------
   let delen = [];        // [{ id, naam, items: [{ sleutel, tekst, zin }] }]
-  let klaar = new Set(); // sleutels met een opname
+  let klaar = new Set(); // sleutels met een opname (hier of al in het spel)
+  let lokaal = new Set(); // sleutels met een opname in deze browser
+  let opServer = new Set(); // sleutels die al in het spel staan
   let deelNr = 0, itemNr = 0;
 
   async function laadInhoud() {
-    const [w, inst] = await Promise.all([
-      fetch("data/woorden.json").then((r) => r.json()),
-      fetch("data/instellingen.json").then((r) => r.json())
-    ]);
+    const json = (pad) => fetch(pad + "?t=" + Date.now(), { cache: "no-cache" }).then((r) => r.json());
+    const ed = await json("data/edities.json");
+    let nr = new URLSearchParams(location.search).get("anker") || ed.standaard;
+    if (!ed.edities[nr]) nr = ed.standaard;
+    $("editienaam").textContent = "· " + ed.edities[nr].naam;
+    const [w, inst, server] = await Promise.all([json(ed.edities[nr].woorden), json("data/instellingen.json"), json("data/opnames.json")]);
+    // Wat al in het spel staat, telt als ingesproken.
+    opServer = new Set(server.woorden.map((x) => "w:" + x).concat(server.zinnen.map((x) => "z:" + x)));
     const zinnen = [];
     for (const soort of Object.keys(inst.zinnen)) for (const z of inst.zinnen[soort]) zinnen.push({ sleutel: "z:" + z.id, tekst: z.tekst, zin: true });
     delen = [{ id: "zinnen", naam: "Zinnen", items: zinnen }];
@@ -142,6 +150,9 @@
     for (const lvl of w.levels) {
       const items = lvl.woorden.map((woord) => ({ sleutel: "w:" + woord, tekst: woord, zin: false }));
       delen.push({ id: "level" + lvl.nummer, naam: "Level " + lvl.nummer, items });
+    }
+    for (const b of w.bonus || []) {
+      delen.push({ id: b.id, naam: b.naam, items: b.woorden.map((woord) => ({ sleutel: "w:" + woord, tekst: woord, zin: false })) });
     }
   }
 
@@ -170,7 +181,7 @@
       const mime = recorder.mimeType || soort || "audio/webm";
       const blob = new Blob(brokken, { type: mime });
       await bewaar(item.sleutel, { blob, mime, t: Date.now() });
-      klaar.add(item.sleutel);
+      klaar.add(item.sleutel); lokaal.add(item.sleutel);
       teken();
       luister();
     };
@@ -184,9 +195,10 @@
   async function luister() {
     const item = delen[deelNr].items[itemNr];
     const op = await haal(item.sleutel);
-    if (!op) return;
+    if (!op && !opServer.has(item.sleutel)) return;
     if (speler) speler.pause();
-    speler = new Audio(URL.createObjectURL(op.blob));
+    // Eigen opname uit deze browser, anders de versie die al in het spel staat.
+    speler = new Audio(op ? URL.createObjectURL(op.blob) : (item.zin ? "audio/zinnen/" : "audio/woorden/") + item.sleutel.slice(2) + ".mp3");
     speler.play().catch(() => {});
   }
 
@@ -220,7 +232,7 @@
     $("teller").textContent = deel.naam + " · " + (itemNr + 1) + " van " + deel.items.length;
     $("tekst").textContent = item.tekst;
     $("tekst").className = "tekst" + (item.zin ? " zin" : "");
-    $("tip").textContent = loopt ? "Opname loopt…" : heeft ? "Opgenomen. Luister terug, of neem opnieuw op." : (item.zin ? "Zeg de zin warm en rustig, zoals je het tegen haar zou zeggen." : "");
+    $("tip").textContent = loopt ? "Opname loopt…" : lokaal.has(item.sleutel) ? "Opgenomen. Luister terug, of neem opnieuw op." : heeft ? "Staat al in het spel. Overslaan mag; opnieuw opnemen kan ook." : (item.zin ? "Zeg de zin warm en rustig, zoals je het tegen haar zou zeggen." : "");
     $("opnemen").textContent = loopt ? "■ Stop" : heeft ? "● Opnieuw" : "● Opnemen";
     $("opnemen").classList.toggle("loopt", loopt);
     $("luister").disabled = !heeft || loopt;
@@ -235,7 +247,10 @@
       $("lijst").appendChild(c);
     });
     const n = deel.items.filter((x) => klaar.has(x.sleutel)).length;
-    $("download").disabled = n === 0 || loopt;
+    $("download").disabled = deel.items.every((x) => !lokaal.has(x.sleutel)) || loopt;
+    const nieuw = [...lokaal].filter((k) => !opServer.has(k)).length;
+    $("downloadNieuw").disabled = nieuw === 0 || loopt;
+    $("downloadNieuw").textContent = "Download alles wat nieuw is (" + nieuw + ")";
     $("downloadinfo").textContent = n + " van " + deel.items.length + " opgenomen in dit deel";
   }
   function eersteOpen(d) {
@@ -266,6 +281,20 @@
   $("volgende").onclick = volgende;
   $("vorige").onclick = vorige;
   $("download").onclick = download;
+  // Alles wat in deze browser is opgenomen en nog niet in het spel staat, in één zip.
+  $("downloadNieuw").onclick = async () => {
+    const bestanden = [];
+    for (const sleutel of [...lokaal].filter((k) => !opServer.has(k)).sort()) {
+      const op = await haal(sleutel);
+      if (!op) continue;
+      const map = sleutel.startsWith("z:") ? "zinnen/" : "woorden/";
+      bestanden.push({ naam: map + sleutel.slice(2) + "." + extensie(op.mime), data: new Uint8Array(await op.blob.arrayBuffer()) });
+    }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(maakZip(bestanden));
+    a.download = "balimba-opnames-nieuw-" + new Date().toISOString().slice(0, 10) + ".zip";
+    document.body.appendChild(a); a.click(); a.remove();
+  };
   document.addEventListener("keydown", (e) => {
     if (e.target.tagName === "BUTTON" && (e.code === "Space" || e.code === "Enter")) e.preventDefault();
     if (e.code === "Space") { e.preventDefault(); wissel(); }
@@ -279,7 +308,8 @@
     try {
       db = await openDb();
       await laadInhoud();
-      klaar = new Set(await alleSleutels());
+      lokaal = new Set(await alleSleutels());
+      klaar = new Set([...lokaal, ...opServer]);
       const d = delen.findIndex((x) => x.items.some((i) => !klaar.has(i.sleutel)));
       deelNr = d < 0 ? 0 : d; itemNr = eersteOpen(deelNr);
       teken();

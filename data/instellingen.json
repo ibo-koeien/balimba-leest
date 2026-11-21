@@ -50,6 +50,16 @@
         "id": "alle-klaar-1",
         "tekst": "Je hebt de hele tocht gedaan! De Grote Aap is ontzettend trots op jou!"
       }
+    ],
+    "uiKlaar": [
+      {
+        "id": "ui-klaar-1",
+        "tekst": "Ui-feest! Jij kunt de ui al heel goed lezen!"
+      },
+      {
+        "id": "ui-klaar-2",
+        "tekst": "Hoera, het hele ui-level! Wat knap van jou!"
+      }
     ]
   }
 }

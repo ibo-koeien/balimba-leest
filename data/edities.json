@@ -1,0 +1,19 @@
+{
+  "standaard": "4",
+  "edities": {
+    "3": {
+      "naam": "Anker 3",
+      "woorden": "data/woorden.json",
+      "tocht": "data/tocht.json",
+      "stickersPerLevel": 5,
+      "opslag": "balimba."
+    },
+    "4": {
+      "naam": "Anker 4",
+      "woorden": "data/anker4/woorden.json",
+      "tocht": "data/anker4/tocht.json",
+      "stickersPerLevel": 4,
+      "opslag": "balimba.a4."
+    }
+  }
+}
