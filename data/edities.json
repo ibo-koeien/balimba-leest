@@ -13,7 +13,8 @@
       "woorden": "data/anker4/woorden.json",
       "tocht": "data/anker4/tocht.json",
       "stickersPerLevel": 4,
-      "opslag": "balimba.a4."
+      "opslag": "balimba.a4.",
+      "thema": "winter"
     }
   }
 }

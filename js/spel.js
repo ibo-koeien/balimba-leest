@@ -172,8 +172,24 @@
 
   function rondeWoorden() {
     const n = inst.rondeGrootte;
+    if (plek.ronde === "ui") return uiWoorden(plek.level);
     return alleLevels()[plek.level].woorden.slice(plek.ronde * n, (plek.ronde + 1) * n);
   }
+
+  // ---------- De ui-stap ----------
+  // Bij anker 4 heeft elk level op de tocht na vier stickers een vijfde stap: de ui-stap.
+  // Die haalt ze met één ui-ronde: tien woorden met ui. Level 1 krijgt de eerste tien woorden
+  // van de ui-lijst, level 2 de volgende tien, enzovoort; na de laatste begint de lijst opnieuw.
+  const heeftUi = () => !!(woorden && woorden.ui);
+  function uiWoorden(level) {
+    const pool = woorden.ui.woorden, n = inst.rondeGrootte, start = (level * n) % pool.length;
+    return Array.from({ length: Math.min(n, pool.length) }, (_, i) => pool[(start + i) % pool.length]);
+  }
+  const uiGeplakt = (level) => !!haal("ui")[level];
+  const uiTegoed = (level) => !!haal("uiTegoed")[level];
+  const stickersVol = (level) => geplakt(level).length >= stickers.perLevel;
+  // Een level is af als alle stickers erop zitten, en (bij anker 4) ook de ui-stap.
+  const levelKlaar = (level) => stickersVol(level) && (!heeftUi() || uiGeplakt(level));
 
   // Kan dit woord worden voorgezegd? Zo niet, dan slaat het spel het luisteren over.
   const kanHoren = (w) => inst.computerstem || heeftWoord(w);
@@ -190,6 +206,13 @@
   function levelMetTegoed() {
     for (let i = 0; i < woorden.levels.length; i++) if (tegoed(i) > 0) return i;
     return -1;
+  }
+  // Ligt er iets klaar om te plakken? Eerst stickers, dan een ui-stempel.
+  function openTegoed() {
+    const l = levelMetTegoed();
+    if (l >= 0) return { level: l, ui: false };
+    if (heeftUi()) for (let i = 0; i < woorden.levels.length; i++) if (uiTegoed(i) && !uiGeplakt(i)) return { level: i, ui: true };
+    return null;
   }
 
   // Eenmalig: rondes die al gespeeld waren voordat het stickerbord bestond, tellen mee.
@@ -223,6 +246,16 @@
         img.src = "img/stickers/" + lijst[i] + ".svg";
         v.appendChild(img);
       } else if (metDoel && !doel) { v.classList.add("doel"); doel = v; }
+      el.appendChild(v);
+    }
+    if (heeftUi() && !isBonus(level)) {
+      const v = document.createElement("span");
+      v.className = "vakje uivak" + (uiGeplakt(level) ? " vol" : "");
+      if (uiGeplakt(level)) {
+        const img = document.createElement("img");
+        img.className = "sticker"; img.alt = ""; img.draggable = false; img.src = "img/stickers/uitje.svg";
+        v.appendChild(img);
+      } else v.textContent = "ui";
       el.appendChild(v);
     }
     return doel;
@@ -265,19 +298,33 @@
   }
   function kiesLevel(i) {
     const perLevel = opslag.lees(NS + "rondePerLevel", {});
-    plek = { level: i, ronde: Math.min(perLevel[i] || 0, aantalRondes(i) - 1) };
+    const r = perLevel[i];
+    plek = { level: i, ronde: r === "ui" && heeftUi() && stickersVol(i) ? "ui" : Math.min(typeof r === "number" ? r : 0, aantalRondes(i) - 1) };
     bewaarPlek(); vulStart();
   }
-  function kiesRonde(r) { plek.ronde = r; bewaarPlek(); vulStart(); }
+  function kiesRonde(r) {
+    // De ui-ronde gaat pas open als de vier stickers van dit level erop zitten.
+    if (r === "ui" && !stickersVol(plek.level)) { speelAf($("rondes").lastChild, "wiebel"); return; }
+    plek.ronde = r; bewaarPlek(); vulStart();
+  }
 
   function vulStart() {
     const lvl = alleLevels()[plek.level];
     $("waar").textContent = editie.naam + " · " + lvl.naam;
     vulKiezer($("levels"), alleLevels().length, plek.level, () => false, kiesLevel, (i) => alleLevels()[i].label || String(i + 1));
     vulKiezer($("rondes"), aantalRondes(plek.level), plek.ronde, (r) => rondeGedaan(plek.level, r), kiesRonde);
+    if (heeftUi() && !isBonus(plek.level)) {
+      const b = document.createElement("button");
+      const open = stickersVol(plek.level);
+      b.className = "kies ui" + (plek.ronde === "ui" ? " actief" : "") + (open ? "" : " dicht") +
+        (uiGeplakt(plek.level) ? " gedaan" : "") + (open && !uiGeplakt(plek.level) && plek.ronde !== "ui" ? " wenk" : "");
+      b.textContent = "ui";
+      b.addEventListener("click", () => kiesRonde("ui"));
+      $("rondes").appendChild(b);
+    }
     // Op het strookje: de stickers van dit level, of bij een bonuslevel de gevierde feestjes.
     if (isBonus(plek.level)) maakFeestjes($("ministickers"), plek.level); else maakVakjes($("ministickers"), plek.level, false);
-    $("naarBord").classList.toggle("wenk", levelMetTegoed() >= 0);
+    $("naarBord").classList.toggle("wenk", !!openTegoed());
     $("stilUitleg").classList.toggle("verborgen", rondeWoorden().every(kanHoren));
   }
 
@@ -347,13 +394,13 @@
     const log = opslag.lees(NS + "metingen", []);
     log.push({
       w: item.w,
-      level: alleLevels()[plek.level].nummer,
-      ronde: plek.ronde + 1,
+      level: plek.ronde === "ui" ? "ui" : alleLevels()[plek.level].nummer,
+      ronde: plek.ronde === "ui" ? alleLevels()[plek.level].nummer : plek.ronde + 1,
       // Leestijd: van het verschijnen van het woord tot de eerste tik op het oortje.
       // Zonder opname is er geen oortje; dan telt de tijd tot ze zelf beoordeelt.
       msLees: Math.round((st.tOor || performance.now()) - st.t0),
       oor: kanHoren(item.w),
-      doorgang: doorgangNr(plek.level),
+      doorgang: plek.ronde === "ui" ? (haal("uiAantal").n || 0) + 1 : doorgangNr(plek.level),
       ms: Math.round(performance.now() - st.t0),
       terug: !!(item.terug || st.herkansing),
       uitkomst,
@@ -454,6 +501,15 @@
   }
 
   function rondeKlaar() {
+    // Een ui-ronde: ui-feestje, en (de eerste keer per level) een ui-stempel voor de tocht.
+    if (plek.ronde === "ui") {
+      const l = plek.level;
+      const a = haal("uiAantal"); a.n = (a.n || 0) + 1; zet("uiAantal", a);
+      const stempel = !uiGeplakt(l);
+      if (stempel) { const t = haal("uiTegoed"); t[l] = true; zet("uiTegoed", t); }
+      toonUifeest(stempel);
+      return;
+    }
     maakSterren($("eindsterren"), st.totaal, st.sterren);
     toonScherm("klaar");
     fanfare();
@@ -503,15 +559,16 @@
     // Heel level rond: De Grote Aap danst. Anders dansen de aap en het katje klein.
     $("gorilla").classList.toggle("verborgen", !verdiend);
     $("klaarDuo").classList.toggle("verborgen", verdiend);
-    if (feest) { toonUifeest(); return; }
+    if (feest) { toonUifeest(false); return; }
     const trots = verdiend && (inst.zinnen.levelKlaar || []).some((x) => opnames.zinnen.includes(x.id));
     if (verdiend) setTimeout(fanfare, 700);
     setTimeout(() => zegZin(trots ? "levelKlaar" : "rondeKlaar"), verdiend ? 1500 : 900);
   }
 
   // ---------- Ui-feestje: het hele ui-level is rond ----------
-  function toonUifeest() {
+  function toonUifeest(stempel) {
     toonScherm("uifeest");
+    $("naarUiSticker").classList.toggle("verborgen", !stempel);
     const conf = $("uiconfetti");
     conf.innerHTML = "";
     const kleuren = ["#c9a6ff", "#ffd24a", "#ff8fb0", "#9be0a4", "#8fc7ff", "#f2c95c"];
@@ -539,13 +596,14 @@
     for (const k of Object.keys(attrs || {})) e.setAttribute(k, attrs[k]);
     return e;
   };
-  const allesAf = () => woorden.levels.every((_, i) => geplakt(i).length >= stickers.perLevel);
+  const allesAf = () => woorden.levels.every((_, i) => levelKlaar(i));
 
   // Waar staat het katje? Bij de laatst geplakte sticker, anders bij het huisje.
   function katPlek() {
     const k = opslag.lees(NS + "kat", null);
-    if (k && geplakt(k.level).length > k.i) return tocht.levels[k.level].stappen[k.i];
+    if (k && tocht.levels[k.level] && (k.i < stickers.perLevel ? geplakt(k.level).length > k.i : uiGeplakt(k.level))) return tocht.levels[k.level].stappen[k.i];
     for (let l = woorden.levels.length - 1; l >= 0; l--) {
+      if (heeftUi() && uiGeplakt(l) && tocht.levels[l].stappen[stickers.perLevel]) return tocht.levels[l].stappen[stickers.perLevel];
       const n = Math.min(geplakt(l).length, stickers.perLevel);
       if (n > 0) return tocht.levels[l].stappen[n - 1];
     }
@@ -553,7 +611,7 @@
   }
 
   // Tekent de tocht in een vak. Geeft de stenen terug, per level een rij.
-  function tekenTocht(vak, doelLevel) {
+  function tekenTocht(vak, doelLevel, doelUi) {
     const B = tocht.breedte, H = tocht.hoogte;
     const pct = (p) => ({ left: (p[0] / B) * 100 + "%", top: (p[1] / H) * 100 + "%" });
     vak.innerHTML = "";
@@ -583,15 +641,17 @@
     const st0 = svgEl("text", { x: sx, y: sy + 25, "text-anchor": "middle", "font-size": 25, "font-weight": 700, fill: "#fff", "font-family": "Andika, sans-serif" });
     st0.textContent = "start";
     kaart.appendChild(st0);
+    // Versiering (zoals een kerstboom en een sneeuwpop) uit tocht.json.
+    for (const d of tocht.decor || []) zet(d.id, d.x, d.y, d.w);
     const plekken = tocht.levels.map((lvl, i) => {
       const eind = lvl.stappen[lvl.stappen.length - 1];
-      const af = geplakt(i).length >= stickers.perLevel;
+      const af = levelKlaar(i);
       const w = lvl.grootte || (lvl.groot ? 180 : (tocht.plekGrootte || 132));
       const u = zet("p-" + lvl.plek, eind[0], eind[1] - 32, w, "plek" + (af ? " af" : ""));
       const nr = svgEl("g", {});
       // Het nummer staat links naast de eindsteen, of (bij een krappe tocht) linksboven op de plek.
-      const boven = tocht.nummer === "boven";
-      const bx = eind[0] - (boven ? w / 2 - 12 : (lvl.groot ? 86 : 64));
+      const boven = tocht.nummer === "boven" || tocht.nummer === "rechtsboven";
+      const bx = tocht.nummer === "rechtsboven" ? eind[0] + w / 2 - 6 : eind[0] - (boven ? w / 2 - 12 : (lvl.groot ? 86 : 64));
       const by = boven ? eind[1] - 32 - w * (120 / 140) + 26 : eind[1] + 6;
       nr.appendChild(svgEl("circle", { cx: bx, cy: by, r: 17, fill: "#8a4fff", stroke: "#fff", "stroke-width": 3 }));
       const t = svgEl("text", { x: bx, y: by + 7, "text-anchor": "middle", "font-size": 20, "font-weight": 700, fill: "#fff", "font-family": "Andika, sans-serif" });
@@ -602,23 +662,50 @@
     });
     vak.appendChild(kaart);
 
-    let doel = null;
+    let doel = null, nr = 0;
+    const kleuren = ["#ff7b8e", "#4fbf95", "#6fa8f5", "#b48cf0", "#ffa94d"];
     const stenen = tocht.levels.map((lvl, l) => lvl.stappen.map((p, i) => {
       const v = document.createElement("span");
-      // De vijfde stap is het einde van het level: groter, met een dikke gouden rand.
-      v.className = "vakje steen" + (i === lvl.stappen.length - 1 ? " eind" : "");
+      const isUi = heeftUi() && i === stickers.perLevel;
+      // De laatste stap is het einde van het level: groter, met een dikke gouden rand.
+      // Bij anker 4 is dat de ui-stap.
+      v.className = "vakje steen" + (i === lvl.stappen.length - 1 ? " eind" : "") + (isUi ? " uistap" : "");
       Object.assign(v.style, pct(p));
-      const id = geplakt(l)[i];
+      if (!isUi) { nr++; v.style.setProperty("--deur", kleuren[nr % kleuren.length]); }
+      const id = isUi ? (uiGeplakt(l) ? "uitje" : null) : geplakt(l)[i];
       if (id) {
         v.classList.add("vol");
         const img = document.createElement("img");
         img.className = "sticker"; img.alt = ""; img.draggable = false;
         img.src = "img/stickers/" + id + ".svg";
         v.appendChild(img);
-      } else if (l === doelLevel && !doel) { v.classList.add("doel"); doel = v; }
+      } else {
+        // Een dicht deurtje met een nummer, zoals bij een adventskalender; de ui-stap heeft 'ui'.
+        const t = document.createElement("span");
+        t.className = "nr";
+        t.textContent = isUi ? "ui" : String(nr);
+        v.appendChild(t);
+        if (l === doelLevel && !doel && !!doelUi === isUi) { v.classList.add("doel"); doel = v; }
+      }
       vak.appendChild(v);
       return v;
     }));
+
+    // Winter: zachtjes vallende sneeuw over de tocht.
+    if (document.body.classList.contains("winter")) {
+      const sneeuw = document.createElement("div");
+      sneeuw.className = "sneeuw";
+      for (let i = 0; i < 28; i++) {
+        const f = document.createElement("i");
+        f.textContent = "❄";
+        f.style.left = Math.random() * 100 + "%";
+        f.style.fontSize = 10 + Math.random() * 14 + "px";
+        f.style.animationDuration = 7 + Math.random() * 8 + "s";
+        f.style.animationDelay = -Math.random() * 15 + "s";
+        sneeuw.appendChild(f);
+      }
+      vak.appendChild(sneeuw);
+    }
 
     // Bij het plakken: een stuiterende pijl wijst de ene steen aan waar de sticker op mag.
     vak.classList.toggle("kiest", !!doel);
@@ -641,11 +728,22 @@
 
   // ---------- Sticker kiezen en plakken ----------
 
-  function toonKiezen(level) {
+  function toonKiezen(level, ui) {
     stil();
     st = null;
     toonScherm("kiezen");
-    const { doel } = tekenTocht($("kiesTocht"), level);
+    const { doel } = tekenTocht($("kiesTocht"), level, ui);
+    if (ui) {
+      // De ui-stap: één bijzondere sticker, het uitje.
+      const vel = $("vel");
+      vel.innerHTML = "";
+      const img = document.createElement("img");
+      img.className = "sticker"; img.alt = ""; img.draggable = false;
+      img.src = "img/stickers/uitje.svg";
+      maakSleepbaar(img, "uitje", level, doel, true);
+      vel.appendChild(img);
+      return;
+    }
 
     // Een vel met stickers: eerst de stickers die nog nergens geplakt zijn.
     const gebruikt = new Set(Object.values(haal("stickers")).flat());
@@ -662,7 +760,7 @@
     }
   }
 
-  function maakSleepbaar(img, id, level, doel) {
+  function maakSleepbaar(img, id, level, doel, ui) {
     img.addEventListener("pointerdown", (e) => {
       if (!doel || doel.classList.contains("vol")) return;
       e.preventDefault();
@@ -692,7 +790,7 @@
         window.removeEventListener("pointerup", los);
         window.removeEventListener("pointercancel", los);
         doel.classList.remove("boven");
-        if (raakt()) { const pijl = doel.parentNode.querySelector(".pijl"); if (pijl) pijl.remove(); plak(zweef, id, level, doel); return; }
+        if (raakt()) { const pijl = doel.parentNode.querySelector(".pijl"); if (pijl) pijl.remove(); plak(zweef, id, level, doel, ui); return; }
         zweef.remove();
         img.style.visibility = "";
       };
@@ -702,11 +800,22 @@
     });
   }
 
-  function plak(zweef, id, level, doel) {
+  function plak(zweef, id, level, doel, ui) {
     const van = katPlek();                       // waar het katje nu staat
-    const s = haal("stickers"); s[level] = (s[level] || []).concat(id); zet("stickers", s);
-    const t = haal("tegoed"); t[level] = Math.max(0, (t[level] || 0) - 1); zet("tegoed", t);
-    const i = s[level].length - 1;
+    let i;
+    if (ui) {
+      const u = haal("ui"); u[level] = true; zet("ui", u);
+      const t = haal("uiTegoed"); delete t[level]; zet("uiTegoed", t);
+      i = stickers.perLevel;
+      // Level af: het beginscherm springt naar het volgende level.
+      if (woorden.levels[level + 1]) { kiesLevel(level + 1); }
+    } else {
+      const s = haal("stickers"); s[level] = (s[level] || []).concat(id); zet("stickers", s);
+      const t = haal("tegoed"); t[level] = Math.max(0, (t[level] || 0) - 1); zet("tegoed", t);
+      i = s[level].length - 1;
+      // Vierde sticker erop: de volgende stap is de ui-ronde van dit level.
+      if (heeftUi() && stickersVol(level) && !uiGeplakt(level) && plek.level === level) { plek.ronde = "ui"; bewaarPlek(); }
+    }
     opslag.schrijf(NS + "kat", { level, i });
 
     const v = doel.getBoundingClientRect();
@@ -732,7 +841,8 @@
       v.addEventListener("pointerdown", () => {
         timer = setTimeout(() => {
           if (!window.confirm("Deze sticker weghalen?")) return;
-          const s = haal("stickers"); s[l].splice(i, 1); zet("stickers", s);
+          if (heeftUi() && i === stickers.perLevel) { const u = haal("ui"); delete u[l]; zet("ui", u); }
+          else { const s = haal("stickers"); s[l].splice(i, 1); zet("stickers", s); }
           toonBord();
         }, 1500);
       });
@@ -740,7 +850,7 @@
     }));
 
     if (!nieuw) return;
-    const levelAf = geplakt(nieuw.level).length >= stickers.perLevel;
+    const levelAf = levelKlaar(nieuw.level);
     stenen[nieuw.level][nieuw.i].classList.add("net");
     if (levelAf) plekken[nieuw.level].classList.remove("af");     // kleurt zo meteen in
     Object.assign(loper.style, pct(nieuw.van));
@@ -806,6 +916,7 @@
       if (!ed.edities[editieNr]) editieNr = ed.standaard;
       editie = ed.edities[editieNr];
       NS = editie.opslag;
+      document.body.classList.toggle("winter", editie.thema === "winter");
       plek = opslag.lees(NS + "plek", { level: 0, ronde: 0 });
       const [w, i] = await Promise.all([haalJson(editie.woorden), haalJson("data/instellingen.json")]);
       woorden = w; inst = i;
@@ -820,7 +931,7 @@
       // Voorbeeld voor de ouder: index.html?toon=aap laat de dansende aap zien, zonder iets te bewaren.
       const toon = new URLSearchParams(location.search).get("toon");
       if (toon === "finale") toonFinale();
-      if (toon === "uifeest") toonUifeest();
+      if (toon === "uifeest") toonUifeest(false);
       if (toon === "aap") {
         maakSterren($("eindsterren"), inst.rondeGrootte, inst.rondeGrootte);
         $("gorilla").classList.remove("verborgen");
@@ -857,8 +968,12 @@
   $("naarSticker").addEventListener("click", () => toonKiezen(plek.level));
   // Het stickerbord. Ligt er nog een verdiende sticker klaar, dan eerst die plakken.
   $("naarBord").addEventListener("click", () => {
-    const l = levelMetTegoed();
-    if (l >= 0) toonKiezen(l); else toonBord();
+    const t = openTegoed();
+    if (t) toonKiezen(t.level, t.ui); else toonBord();
+  });
+  $("naarUiSticker").addEventListener("click", () => {
+    const t = openTegoed();
+    if (t) toonKiezen(t.level, t.ui); else toonBord();
   });
 
   laad();

@@ -151,6 +151,7 @@
       const items = lvl.woorden.map((woord) => ({ sleutel: "w:" + woord, tekst: woord, zin: false }));
       delen.push({ id: "level" + lvl.nummer, naam: "Level " + lvl.nummer, items });
     }
+    if (w.ui) delen.push({ id: "ui", naam: w.ui.naam || "ui-woorden", items: w.ui.woorden.map((woord) => ({ sleutel: "w:" + woord, tekst: woord, zin: false })) });
     for (const b of w.bonus || []) {
       delen.push({ id: b.id, naam: b.naam, items: b.woorden.map((woord) => ({ sleutel: "w:" + woord, tekst: woord, zin: false })) });
     }

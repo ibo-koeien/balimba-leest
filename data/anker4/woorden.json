@@ -109,18 +109,13 @@
       ]
     }
   ],
-  "bonus": [
-    {
-      "id": "ui",
-      "nummer": "ui",
-      "label": "ui",
-      "naam": "ui-level",
-      "woorden": [
-        "trui", "kruis", "vuist", "kruip", "snuit", "duif", "kuif", "fuif", "ruig", "buig",
-        "zuig", "tuig", "wuif", "fuik", "struik", "spruit", "fluit", "fruit", "juich", "sluipt",
-        "bruist", "kruipt", "druipt", "snuift", "juicht", "vuilst", "ruimst", "huismus", "huiskat", "pakhuis",
-        "buikpijn", "tuinman", "huisdier", "moestuin", "voortuin", "kerkuil", "duikboot", "uitweg", "voertuig", "zintuig"
-      ]
-    }
-  ]
+  "ui": {
+    "naam": "ui-woorden",
+    "woorden": [
+      "trui", "kruis", "vuist", "kruip", "snuit", "duif", "kuif", "fuif", "ruig", "buig",
+      "zuig", "tuig", "wuif", "fuik", "struik", "spruit", "fluit", "fruit", "juich", "sluipt",
+      "bruist", "kruipt", "druipt", "snuift", "juicht", "vuilst", "ruimst", "huismus", "huiskat", "pakhuis",
+      "buikpijn", "tuinman", "huisdier", "moestuin", "voortuin", "kerkuil", "duikboot", "uitweg", "voertuig", "zintuig"
+    ]
+  }
 }

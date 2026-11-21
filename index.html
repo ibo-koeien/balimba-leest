@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/stijl.css?v=202611211156">
+<link rel="stylesheet" href="css/stijl.css?v=202611211205">
 </head>
 <body data-vorm="alleen">
 
@@ -129,6 +129,25 @@
     <path d="M70 110 Q80 122 90 110Z" fill="#7a2e4a" stroke="#5a2440" stroke-width="2" stroke-linejoin="round"/>
     <path d="M48 52 l6 -18 8 10 6 -14 6 14 8 -10 6 18Z" fill="#ffd24a" stroke="#f0b400" stroke-width="2.5" stroke-linejoin="round" transform="translate(4 -6) rotate(-8 74 44)"/>
   </symbol>
+    <symbol id="d-kerstboom" viewBox="0 0 140 120">
+    <rect x="62" y="98" width="16" height="16" rx="3" fill="#b9824a"/>
+    <path d="M70 8 L104 52 H88 L114 80 H94 L120 102 H20 L46 80 H26 L52 52 H36Z" fill="#4fbf95" stroke="#2f9a72" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M42 70 Q70 82 98 66 M36 92 Q70 104 108 88" fill="none" stroke="#ffd24a" stroke-width="3" stroke-linecap="round"/>
+    <g><circle cx="58" cy="48" r="4.5" fill="#ff7b8e"/><circle cx="84" cy="60" r="4.5" fill="#6fa8f5"/><circle cx="54" cy="84" r="4.5" fill="#ffa94d"/><circle cx="90" cy="88" r="4.5" fill="#ff7b8e"/><circle cx="72" cy="38" r="4" fill="#b48cf0"/></g>
+    <path d="M70 0 l3.5 8 8.5 .8 -6.5 5.6 2 8.4 -7.5 -4.5 -7.5 4.5 2 -8.4 -6.5 -5.6 8.5 -.8z" fill="#ffd24a" stroke="#f0b400" stroke-width="1.5" stroke-linejoin="round"/>
+    <rect x="22" y="100" width="22" height="16" rx="3" fill="#ff7b8e"/><path d="M33 100 v16 M22 108 h22" stroke="#fff" stroke-width="3"/>
+    <rect x="98" y="102" width="20" height="14" rx="3" fill="#6fa8f5"/><path d="M108 102 v14 M98 109 h20" stroke="#fff" stroke-width="3"/>
+  </symbol>
+  <symbol id="d-sneeuwpop" viewBox="0 0 140 120">
+    <circle cx="70" cy="88" r="28" fill="#fff" stroke="#c9d8ee" stroke-width="3"/>
+    <circle cx="70" cy="46" r="20" fill="#fff" stroke="#c9d8ee" stroke-width="3"/>
+    <rect x="54" y="20" width="32" height="6" rx="3" fill="#3d3852"/><rect x="58" y="4" width="24" height="18" rx="3" fill="#3d3852"/>
+    <circle cx="63" cy="42" r="2.6" fill="#2b1b4a"/><circle cx="77" cy="42" r="2.6" fill="#2b1b4a"/>
+    <path d="M70 48 L84 51 L70 53Z" fill="#ffa94d"/>
+    <path d="M52 62 Q70 70 88 62 L90 68 Q70 76 50 68Z" fill="#ff7b8e"/><path d="M80 66 l4 18 h-8z" fill="#ff7b8e"/>
+    <circle cx="70" cy="80" r="2.6" fill="#3d3852"/><circle cx="70" cy="92" r="2.6" fill="#3d3852"/>
+    <path d="M44 84 L22 70 M96 84 L118 70" stroke="#b9824a" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
   <symbol id="t-huis" viewBox="0 0 140 120">
     <rect x="38" y="58" width="64" height="56" rx="6" fill="#fff6e6" stroke="#e0c8a0" stroke-width="3"/>
     <path d="M26 62 L70 22 L114 62Z" fill="#ff8fb0" stroke="#e0608a" stroke-width="3" stroke-linejoin="round"/>
@@ -206,8 +225,8 @@
     <path d="M700 120 a26 26 0 0 1 48 -14 a34 34 0 0 1 64 10 a23 23 0 0 1 -4 46 h-98 a23 23 0 0 1 -10 -42z"/>
     <path d="M430 300 a20 20 0 0 1 36 -10 a26 26 0 0 1 48 8 a18 18 0 0 1 -4 36 h-74 a18 18 0 0 1 -6 -34z" opacity=".7"/>
   </g>
-  <path d="M0 560 Q180 470 380 540 T760 520 T1000 550 V700 H0 Z" fill="#cfeed6"/>
-  <path d="M0 620 Q220 540 460 610 T1000 600 V700 H0 Z" fill="#b4e3c2"/>
+  <path class="heuvel1" d="M0 560 Q180 470 380 540 T760 520 T1000 550 V700 H0 Z" fill="#cfeed6"/>
+  <path class="heuvel2" d="M0 620 Q220 540 460 610 T1000 600 V700 H0 Z" fill="#b4e3c2"/>
   <g fill="#fff"><circle cx="120" cy="640" r="5"/><circle cx="310" cy="668" r="5"/><circle cx="640" cy="650" r="5"/><circle cx="880" cy="672" r="5"/></g>
   <g fill="#ffb3d1"><circle cx="210" cy="676" r="5"/><circle cx="520" cy="680" r="5"/><circle cx="760" cy="640" r="5"/></g>
 </svg>
@@ -320,7 +339,10 @@
     <svg class="dier groot-ui" viewBox="0 0 160 150"><use href="#t-ui"/></svg>
     <svg class="dier"><use href="#t-kat"/></svg>
   </div>
-  <button class="rond stil" id="uifeestHuis" aria-label="Terug naar het begin"><span>⌂</span></button>
+  <div class="keuze">
+    <button class="rond plak wenk verborgen" id="naarUiSticker" aria-label="Ui-stempel plakken"><span>🎁</span></button>
+    <button class="rond stil" id="uifeestHuis" aria-label="Terug naar het begin"><span>⌂</span></button>
+  </div>
 </section>
 
 <!-- Finale: de hele tocht is af -->
@@ -330,7 +352,7 @@
   <button class="rond stil" id="finaleHuis" aria-label="Terug naar het begin"><span>⌂</span></button>
 </section>
 
-<script>window.BALIMBA_VERSIE = "202611211156";</script>
-<script src="js/spel.js?v=202611211156"></script>
+<script>window.BALIMBA_VERSIE = "202611211205";</script>
+<script src="js/spel.js?v=202611211205"></script>
 </body>
 </html>
